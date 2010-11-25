@@ -87,14 +87,22 @@ DifDeepPixel* DifDeepPixel::create(unsigned int x, unsigned int y, unsigned int 
 
 
 /// Returns the greatest depth sample of this deep pixel.
-double DifDeepPixel::depth() const {
+double DifDeepPixel::depth() {
 	if(m_qValues.size() < 1) return 0.0;
+
+	if(m_bDirty == true) {
+		sort();
+	}
 
 	return m_qValues[m_qValues.size()-1]->depth();
 }
 
 bool DifDeepPixel::canHandle(const DifPixel& px) const {
 	return (px.channels() == m_iChannels && px.alphaChannel() == m_iAlpha) ? true : false;
+}
+
+unsigned int DifDeepPixel::samples() const {
+	return m_qValues.size();
 }
 
 /**
@@ -108,6 +116,10 @@ bool DifDeepPixel::canHandle(const DifPixel& px) const {
  * @return Pointer to a DifPixel object
  */
 DifPixel* DifDeepPixel::operator[](unsigned int idx) {
+	if(m_bDirty == true) {
+		sort();
+	}
+
 	return m_qValues[idx];
 }
 
@@ -121,7 +133,7 @@ bool DifDeepPixel::pixel(DifPixel& tw) {
 
 	DifPixel *handle = getAtDepth(tw.depth());
 
-	if(handle) {
+	if(handle != NULL) {
 		return handle->set(tw);
 	} else {
 		handle = new DifPixel(tw);

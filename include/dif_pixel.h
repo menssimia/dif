@@ -64,9 +64,9 @@ class DifPixel {
 class DifDeepPixel {
 	friend class DifFile;
 	public:
-		double depth() const;
+		double depth();
 		DifPixel* operator[](unsigned int idx);
-
+		unsigned int samples() const;
 		void sort();
 
 		bool pixel(DifPixel& tw);
