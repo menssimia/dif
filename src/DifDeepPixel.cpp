@@ -142,12 +142,12 @@ bool DifDeepPixel::pixel(DifPixel& tw) {
 	}
 }
 
-DifPixel& DifDeepPixel::evaluate(float depth) {
+DifPixel& DifDeepPixel::evaluate(float depth, DifDepthEvaluator eval) {
 	if(m_bDirty == true) {
 		sort();
 	}
 
-	//TODO
+	return eval(*this, depth);
 }
 
 //@}

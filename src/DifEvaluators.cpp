@@ -26,33 +26,38 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef DIFFILE_H
-#define DIFFILE_H
-
+#include <dif_evaluators.h>
 #include <dif_pixel.h>
 
-#include <map>
-#include <string>
+#include <assert.h>
 
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
+DifPixel& DifEvaluatorConstantMedian(DifDeepPixel& dp, double depth) {
+	if(dp.depth() < depth) {
+		return *(new DifPixel(*(dp[dp.samples()-1])));
+	} else if(dp[0]->depth() > depth) {
+		return *(new DifPixel(*(dp[0])));
+	}
+	
+	unsigned int samples = dp.samples();
+	int idxa = -1;
+	int idxb = -1;
 
-class DifFile {
-	public:
-		virtual unsigned int channels() const = 0;
-		virtual bool         alphaPresent() const = 0;
-		virtual unsigned int alphaChannel() const = 0;
+	for(unsigned j = 0; j < samples; j++) {
+		if(dp[j]->depth() <= depth) idxa = j;
+		if(dp[j]->depth() >= depth) idxb = j;
 
-		virtual unsigned int XResolution() const = 0;
-		virtual unsigned int YResolution() const = 0;
+		if(idxa > -1 && idxb > -1) break;
+	}
 
-		virtual DifDeepPixel* getPixel(unsigned int x, unsigned int y) = 0;
-		virtual bool          savePixel(unsigned int x, unsigned int y, DifDeepPixel& texel) = 0;
+	assert(idxa > -1);
+	assert(idxb > -1);
+	assert(idxb < samples);
 
-	protected:
-		DifFile() {}
-		virtual ~DifFile() {}
-};
+	double median = ((dp[idxb]->depth() - dp[idxa]->depth()) / 2.0);
 
-#endif // DIFFILE_H
+	if((dp[idxa]->depth() + median) >= depth) {
+		return *(new DifPixel(*(dp[idxa])));
+	} else {
+		return *(new DifPixel(*(dp[idxb])));
+	}
+}

@@ -30,6 +30,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #ifndef DIF_PIXEL_H
 #define DIF_PIXEL_H
 
+#include <dif_evaluators.h>
+
 #include <deque>
 #include <stdio.h>
 
@@ -70,17 +72,17 @@ class DifDeepPixel {
 		void sort();
 
 		bool pixel(DifPixel& tw);
-		DifPixel& evaluate(float depth);
+		DifPixel& evaluate(float depth, DifDepthEvaluator eval = DifEvaluatorConstantMedian);
 
 		bool canHandle(const DifPixel& px) const;
+
+		DifPixel* getAtDepth(double dpt);
 
 	public:
 		static DifDeepPixel* create(unsigned int x, unsigned int y, unsigned int nchannels, int alpha = -1);
 	
 	protected:
 		static bool sortComparator(DifPixel* a, DifPixel* b);
-		
-		DifPixel* getAtDepth(double dpt);
 
 	private:
 		DifDeepPixel(unsigned int x, unsigned int y, unsigned int nchannels, int alpha);

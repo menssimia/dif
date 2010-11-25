@@ -26,33 +26,14 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef DIFFILE_H
-#define DIFFILE_H
+#ifndef DIFEVALUATORS_H
+#define DIFEVALUATORS_H
 
-#include <dif_pixel.h>
+class DifPixel;
+class DifDeepPixel;
 
-#include <map>
-#include <string>
+typedef DifPixel& (*DifDepthEvaluator)(DifDeepPixel&, double);
 
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
+DifPixel& DifEvaluatorConstantMedian(DifDeepPixel& dp, double depth);
 
-class DifFile {
-	public:
-		virtual unsigned int channels() const = 0;
-		virtual bool         alphaPresent() const = 0;
-		virtual unsigned int alphaChannel() const = 0;
-
-		virtual unsigned int XResolution() const = 0;
-		virtual unsigned int YResolution() const = 0;
-
-		virtual DifDeepPixel* getPixel(unsigned int x, unsigned int y) = 0;
-		virtual bool          savePixel(unsigned int x, unsigned int y, DifDeepPixel& texel) = 0;
-
-	protected:
-		DifFile() {}
-		virtual ~DifFile() {}
-};
-
-#endif // DIFFILE_H
+#endif // DIFEVALUATORS_H
