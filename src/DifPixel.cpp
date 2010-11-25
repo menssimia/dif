@@ -81,6 +81,11 @@ DifPixel::~DifPixel() {
 	delete[] m_pData;
 }
 
+/** 
+ * Assigment function
+ * @param[in] src DifPixel object to copy values from
+ * @return true on success or false on error (either channel amount mismatch or alpha index mismatch)
+ */
 bool DifPixel::set(const DifPixel& src) {
 	if(src.m_iChannels != m_iChannels || src.m_iAlpha != m_iAlpha) return false;
 

@@ -31,7 +31,21 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include <assert.h>
 
+#define NEAR_LOOP(a,b,d, max)                                                  \
+	for(unsigned j = 0; j < max; j++) {                                        \
+		if(dp[j]->depth() <= d) a = j;                                         \
+		if(dp[j]->depth() >= d) b = j;                                         \
+                                                                               \
+		if(a > -1 && b > -1) break;                                            \
+	}
+
 DifPixel& DifEvaluatorConstantMedian(DifDeepPixel& dp, double depth) {
+	if(dp.samples() == 0) {
+		return *(new DifPixel(0.0, 0.0, 0.0, 0.0, 0.0));
+	} else if(dp.samples() == 1) {
+		return *(new DifPixel(*(dp[0])));
+	}
+
 	if(dp.depth() < depth) {
 		return *(new DifPixel(*(dp[dp.samples()-1])));
 	} else if(dp[0]->depth() > depth) {
@@ -42,12 +56,7 @@ DifPixel& DifEvaluatorConstantMedian(DifDeepPixel& dp, double depth) {
 	int idxa = -1;
 	int idxb = -1;
 
-	for(unsigned j = 0; j < samples; j++) {
-		if(dp[j]->depth() <= depth) idxa = j;
-		if(dp[j]->depth() >= depth) idxb = j;
-
-		if(idxa > -1 && idxb > -1) break;
-	}
+	NEAR_LOOP(idxa, idxb, depth, samples);
 
 	assert(idxa > -1);
 	assert(idxb > -1);
@@ -61,3 +70,7 @@ DifPixel& DifEvaluatorConstantMedian(DifDeepPixel& dp, double depth) {
 		return *(new DifPixel(*(dp[idxb])));
 	}
 }
+
+
+
+#undef NEAR_LOOP

@@ -142,6 +142,13 @@ bool DifDeepPixel::pixel(DifPixel& tw) {
 	}
 }
 
+/**
+ * Evaluates a pixel at the given @a depth
+ * @param[in] depth The desired depth
+ * @param[in] eval an evaluator
+ * @return A pixel object
+ * @note depth of the returned pixel object mayn't be the same as the desired.
+ */
 DifPixel& DifDeepPixel::evaluate(float depth, DifDepthEvaluator eval) {
 	if(m_bDirty == true) {
 		sort();
