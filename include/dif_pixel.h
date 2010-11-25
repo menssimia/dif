@@ -75,7 +75,7 @@ class DifDeepPixel {
 		bool canHandle(const DifPixel& px) const;
 
 	public:
-		static DifDeepPixel* create(unsigned int nchannels, int alpha = -1);
+		static DifDeepPixel* create(unsigned int x, unsigned int y, unsigned int nchannels, int alpha = -1);
 	
 	protected:
 		static bool sortComparator(DifPixel* a, DifPixel* b);
@@ -83,13 +83,15 @@ class DifDeepPixel {
 		DifPixel* getAtDepth(double dpt);
 
 	private:
-		DifDeepPixel(unsigned int nchannels, int alpha);
+		DifDeepPixel(unsigned int x, unsigned int y, unsigned int nchannels, int alpha);
 		virtual ~DifDeepPixel();
 
 	private:
 		std::deque<DifPixel*> m_qValues;
 		int                   m_iAlpha;
 		unsigned int          m_iChannels;
+		unsigned int          m_iX;
+		unsigned int          m_iY;
 		bool                  m_bDirty;
 };
 

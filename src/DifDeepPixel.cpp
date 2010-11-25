@@ -33,7 +33,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 
 
-DifDeepPixel::DifDeepPixel(unsigned int nchannels, int alpha) : m_iChannels(nchannels), m_iAlpha(alpha), m_bDirty(false) {
+DifDeepPixel::DifDeepPixel(unsigned int x, unsigned int y, unsigned int nchannels, int alpha) : m_iChannels(nchannels), m_iAlpha(alpha), m_bDirty(false) {
 
 }
 
@@ -79,10 +79,10 @@ void DifDeepPixel::sort() {
  * @param[in] alpha     Index of the alpha channel or -1 if not present.
  * @return A new deep pixel object or NULL on error.
  */
-DifDeepPixel* DifDeepPixel::create(unsigned int nchannels, int alpha) {
+DifDeepPixel* DifDeepPixel::create(unsigned int x, unsigned int y, unsigned int nchannels, int alpha) {
 	if(nchannels < 1) return NULL;
 
-	return new DifDeepPixel(nchannels, alpha);
+	return new DifDeepPixel(x, y, nchannels, alpha);
 }
 
 
