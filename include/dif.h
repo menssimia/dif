@@ -86,6 +86,13 @@ class DifImage {
 		 */
 		unsigned int channelSize(unsigned int idx) const;
 
+		/*
+		 * Name of the channel at index @a idx 
+		 * @param[in] idx Channel Index
+		 * @return Name of the channel or null pointer on error
+		 */
+		const char * channelName(unsigned int idx) const;
+
 		/*!
 		 * @brief Query the image resolution
 		 * @param[out] x X Resolution

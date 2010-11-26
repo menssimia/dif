@@ -65,6 +65,24 @@ DifImage* DifImage::open(const char *path, unsigned int xres, unsigned int yres,
 	return handle;
 }
 
+unsigned long DifImage::formatToSize(DifDataFormat format) {
+	switch(format) {
+		case f8Bit:
+			return 1;
+		case f16Bit:
+			return 2;
+		case f32Bit:
+			return 4;
+		case f64Bit:
+			return 8;
+
+		case fSReal:
+			return 4;
+		case fDReal:
+			return 8;
+	}
+}
+
 void DifImage::release() {
 	sync();
 
