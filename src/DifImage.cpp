@@ -39,7 +39,7 @@ typedef struct DifFileHeader {
 	uint32_t datasize;
 } DifFileHeader;
 
-#define _MAGIC 'D' | ('I' << 8) | ('F' << 16) | ('F' << 24) 
+static int32_t DifHeaderMagic =  'D' | ('I' << 8) | ('F' << 16) | ('F' << 24);
 
 DifImage* DifImage::open(const char *path) {
 	FILE *fp = fopen(path, "rb");
@@ -53,7 +53,7 @@ DifImage* DifImage::open(const char *path) {
 
 	fread(handle->m_pHeader, sizeof(DifFileHeader), 1, fp);
 
-	if(handle->m_pHeader->magic != int(_MAGIC)) return NULL;
+	if(handle->m_pHeader->magic != DifHeaderMagic) return NULL;
 
 	return handle;
 }
@@ -68,7 +68,7 @@ DifImage* DifImage::open(const char *path, unsigned int xres, unsigned int yres,
 	handle->m_pFile = fp;
 	handle->m_pHeader = new DifFileHeader;
 
-	handle->m_pHeader->magic = _MAGIC;
+	handle->m_pHeader->magic = DifHeaderMagic;
 
 	handle->m_pHeader->x = xres;
 	handle->m_pHeader->y = yres;
@@ -119,7 +119,7 @@ void DifImage::updateHeader() {
 }
 
 void DifImage::printHeader() {
-	printf("Magic=%d;%d\n", m_pHeader->magic, int(_MAGIC));
+	printf("Magic=%d\n", m_pHeader->magic);
 	printf("XRes=%d\n", m_pHeader->x);
 	printf("YRes=%d\n", m_pHeader->y);
 }
