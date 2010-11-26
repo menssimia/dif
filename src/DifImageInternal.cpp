@@ -34,13 +34,18 @@
 #undef DIF_INTERN
 
 
-DifImageInternal::DifImageInternal(const char *filename, bool create) : m_hFile(-1) {
+DifImageInternal::DifImageInternal(const char *filename, bool create, int xres, int yres) : m_hFile(-1) {
 	if(create == true) {
 		m_hFile = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+		writeIntegerAttribute(m_hFile, "XRes", xres);
+		writeIntegerAttribute(m_hFile, "YRes", yres);
+
 	} else {
 		m_hFile = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
 	}
 
+	loadHeader();
 	loadMetadata();
 }
 
@@ -49,7 +54,7 @@ DifImageInternal::~DifImageInternal() {
 }
 
 bool DifImageInternal::valid() const {
-	return (m_hFile > 0) ? true : false;
+	return (m_hFile > 0 && m_iX > 0 && m_iY > 0) ? true : false;
 }
 
 void DifImageInternal::sync() {
@@ -193,6 +198,25 @@ void DifImageInternal::writeIntegerAttribute(hid_t grp, const std::string& attrn
 	}
 }
 
-int  DifImageInternal::readIntegerAttribute(hid_t grp, const std::string& attrname, int deval) {
+int  DifImageInternal::readIntegerAttribute(hid_t grp, const std::string& attrname, int defval) {
+	hid_t attr = -1;
 
+	if(H5Aexists(grp, attrname.c_str())) {
+		attr = H5Aopen(grp, attrname.c_str(), H5P_DEFAULT);
+
+		int ret;
+
+		H5Aread(attr, H5T_NATIVE_INT, &ret);
+
+		H5Aclose(attr);
+
+		return ret;
+	} else {
+		return defval;
+	}
+}
+
+void DifImageInternal::loadHeader() {
+	m_iX = readIntegerAttribute(m_hFile, "XRes", 0);
+	m_iY = readIntegerAttribute(m_hFile, "YRes", 0);
 }

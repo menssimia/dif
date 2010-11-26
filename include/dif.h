@@ -64,10 +64,10 @@ class DifImage {
 		 * @param[in] path A valid file path
 		 * @param[in] xres X Resolution of the image
 		 * @param[in] yres Y Resolution of the image
-		 * @param[in] format Storage format
+		 * @param[in] format Storage format of the depth Channel
 		 * @return Pointer to a DifImage instance or 0
 		 */
-		static DifImage* open(const char *path, unsigned int xres, unsigned int yres, DifDataFormat format);
+		static DifImage* open(const char *path, unsigned int xres, unsigned int yres, DifDataFormat format = f16Bit);
 
 		/*! 
 		 * @brief Returns the size in bytes of the given storage format
@@ -84,7 +84,14 @@ class DifImage {
 		 * @brief Retrieves the size (in bytes) of the numberic format representing the given channel
 		 * @param[in] idx Channel Index (valid range is 0..channels()-1)
 		 */
-		unsigned int channelSize(unsigned int idx);
+		unsigned int channelSize(unsigned int idx) const;
+
+		/*!
+		 * @brief Query the image resolution
+		 * @param[out] x X Resolution
+		 * @param[out] y Y Resolution
+		 */
+		void resolution(unsigned int &x, unsigned int &y) const;
 		
 		/// Synchronizes any changes to disk
 		void sync();

@@ -54,9 +54,11 @@ DifImage* DifImage::open(const char *path) {
 }
 
 DifImage* DifImage::open(const char *path, unsigned int xres, unsigned int yres, DifDataFormat format) {
+	if(xres < 1 || yres < 0) return NULL;
+
 	DifImage *handle = new DifImage();
 
-	handle->m_pInternal = new DifImageInternal(path, true);
+	handle->m_pInternal = new DifImageInternal(path, true, xres, yres);
 
 	if(handle->m_pInternal->valid() == false) return NULL;
 
@@ -103,4 +105,9 @@ void DifImage::writeMeta(const char* key, const char *value) {
 	} else {
 		m_pInternal->m_mAttributes[std::string(key)] = std::string(value);
 	}
+}
+
+void DifImage::resolution(unsigned int &x, unsigned int &y) const {
+	x = m_pInternal->m_iX;
+	y = m_pInternal->m_iY;
 }
