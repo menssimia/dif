@@ -35,19 +35,21 @@
 class DifImageInternal; // So we don't waste the interface
 
 /*!
- * Deep Image File Format interface class
+ * @brief Deep Image File Format interface class.
+ * 
  * @note The storage format, X and Y resolution cannot be altered once set. 
  */
 class DifImage {
 	public:
 		/// Storage formats
 		typedef enum {
-			f8Bit,   ///< 8 Bit
-			f16Bit,  ///< 16 Bit
-			f32Bit,  ///< 32 Bit
-			f64Bit,  ///< 64 Bit
-			fSReal,  ///< Single precision real
-			fDReal   ///< Double precision real
+			fInvalid, ///< Invalid
+			f8Bit,    ///< 8 Bit
+			f16Bit,   ///< 16 Bit
+			f32Bit,   ///< 32 Bit
+			f64Bit,   ///< 64 Bit
+			fSReal,   ///< Single precision real
+			fDReal    ///< Double precision real
 		} DifDataFormat;
 
 		/*! 
@@ -77,6 +79,12 @@ class DifImage {
 	public:
 		/// Returns the amount of channels.
 		unsigned int channels() const;
+	
+		/*!
+		 * @brief Retrieves the size (in bytes) of the numberic format representing the given channel
+		 * @param[in] idx Channel Index (valid range is 0..channels()-1)
+		 */
+		unsigned int channelSize(unsigned int idx);
 		
 		/// Synchronizes any changes to disk
 		void sync();
@@ -90,21 +98,25 @@ class DifImage {
 		 * @param[in] dflt Return value if attribute does not exists.
 		 * @return the attributes content.
 		 */
-		const char* attribute(const char* key, const char *dflt = "") const;
+		const char* meta(const char* key, const char *dflt = "") const;
 
 		/*!
 		 * @brief Deletes a Metatdata attribute
 		 * @param[in] key Attribute key
 		 * @return True on succes or false if the attribute does not exists.
 		 */
-		bool deleteAttribute(const char* key);
+		bool deleteMeta(const char* key);
 
 		/*!
 		 * @brief Adds or updates a Metadata attribute
+		 *
+		 * Setting an attribute's value to an empty string will also result in the deletion of the attribute
 		 * @param[in] key Attribute key
 		 * @param[in] value Value
+		 * @note This function does not actually write the attributes to disk till you 
+		 *      call DifImage::sync()
 		 */
-		void writeAttribute(const char* key, const char *value);
+		void writeMeta(const char* key, const char *value);
 
 	protected:
 		DifImage();

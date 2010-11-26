@@ -44,6 +44,10 @@
 
 #include <hdf5.h>
 
+#ifdef HDF5_1_80
+	#include <H5Opublic.h>
+#endif // HDF5_1_80
+
 #define ATTRIBUTE_NS "dif_meta_attributes"
 
 // TODO Error managment
@@ -58,6 +62,11 @@ class DifImageInternal {
 		void sync();
 		void writeMetadata();
 		void writeMetadata(hid_t grp, const std::string& key, const std::string& value);
+		void deleteMetadata(hid_t grp, const std::string& key);
+		
+		void loadMetadata();
+	
+		hid_t openCreateGroup(hid_t loc, const char *name);
 
 	public:
 		hid_t m_hFile; // File instance
