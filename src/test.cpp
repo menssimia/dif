@@ -1,4 +1,6 @@
 #include <dif.h>
+#include <cerrno>
+#include <cstring>
 
 int main(int argc, char *argv[]) {
 	DifDeepPixel *px = DifDeepPixel::create(2,2, 4,3);
@@ -27,6 +29,13 @@ int main(int argc, char *argv[]) {
 	printf("depth=%f samples=%d\n", px->depth(), px->samples());
 
 	printf("evaluate=%f\n", (px->evaluate(5)).depth());
+
+	DifImage* img = DifImage::open("test.dif", 2, 2, 4, 3, DifImage::f16Bit);
+
+	if(!img) {
+		printf("Error: %s\n", strerror(errno));
+		return -1;
+	}
 
 	return 0;
 }

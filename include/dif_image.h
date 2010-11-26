@@ -26,33 +26,61 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef DIFFILE_H
-#define DIFFILE_H
+#ifndef DIFIMAGE_H
+#define DIFIMAGE_H
 
 #include <dif_pixel.h>
 
-#include <map>
-#include <string>
+#include <deque>
 
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-class DifFile {
+struct DifFileHeader;
+
+class DifImage {
 	public:
-		virtual unsigned int channels() const = 0;
-		virtual bool         alphaPresent() const = 0;
-		virtual unsigned int alphaChannel() const = 0;
+		typedef enum {
+			f8Bit,   ///< 8 Bit
+			f16Bit,  ///< 16 Bit
+			f32Bit,  ///< 32 Bit
+			f64Bit,  ///< 64 Bit
+			fSReal,  ///< Single precision real
+			fDReal   ///< Double precision real
+		} DifDataFormat;
 
-		virtual unsigned int XResolution() const = 0;
-		virtual unsigned int YResolution() const = 0;
+		unsigned int channels() const;
+		bool         alphaPresent() const;
+		unsigned int alphaChannel() const;
 
-		virtual DifDeepPixel* getPixel(unsigned int x, unsigned int y) = 0;
-		virtual bool          savePixel(unsigned int x, unsigned int y, DifDeepPixel& texel) = 0;
+		unsigned int XResolution() const;
+		unsigned int YResolution() const;
+
+		DifDeepPixel* readPixel(unsigned int x, unsigned int y);
+		bool          saveSave(unsigned int x, unsigned int y, DifDeepPixel& texel);
+
+		DifDeepPixel* at(unsigned int x, unsigned int y);
+
+		void sync();
+	
+	public:
+		static DifImage* open(const char *path);
+		static DifImage* open(const char *path, unsigned int xres, unsigned int yres, 
+							  unsigned int nchannels, unsigned int alphaindex, DifDataFormat format);
+		static unsigned long formatToSize(DifDataFormat format);
 
 	protected:
-		DifFile() {}
-		virtual ~DifFile() {}
+		DifImage();
+		~DifImage();
+
+		void updateHeader();
+
+	private:
+		FILE *m_pFile;
+		DifFileHeader *m_pHeader;
+
+		std::deque<DifDeepPixel*> m_qPixels;
 };
 
-#endif // DIFFILE_H
+#endif // DIFIMAGE_H

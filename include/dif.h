@@ -31,6 +31,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #define DIF_H
 
 #include <dif_pixel.h>
-#include <dif_file.h>
+#include <dif_image.h>
 
 #endif // DIF_H
