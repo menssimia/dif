@@ -110,6 +110,7 @@ void DifImageInternal::writeMetadata() {
 	if(m_mAttributes.size() == 0) return;
 
 	hid_t grp = openCreateGroup(m_hFile, ATTRIBUTE_NS);
+
 	assert(grp > -1);	
 
 	std::map<std::string, std::string>::iterator it;

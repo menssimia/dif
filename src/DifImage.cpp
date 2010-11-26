@@ -74,30 +74,33 @@ void DifImage::sync() {
 }
 
 const char* DifImage::meta(const char* key, const char *dflt) const {
-		std::map<std::string, std::string>::iterator it;
+	std::map<std::string, std::string>::iterator it;
 		
-		if((it = m_pInternal->m_mAttributes.find(std::string(key))) != m_pInternal->m_mAttributes.end()) {
-			return (it->second).c_str();
-		}
+	if((it = m_pInternal->m_mAttributes.find(std::string(key))) != m_pInternal->m_mAttributes.end()) {
+		return (it->second).c_str();
+	}
 
-		return dflt;
+	return dflt;
 }
 
 
 bool DifImage::deleteMeta(const char* key) {
-		std::map<std::string, std::string>::iterator it;
+	std::map<std::string, std::string>::iterator it;
 		
-		if((it = m_pInternal->m_mAttributes.find(std::string(key))) != m_pInternal->m_mAttributes.end()) {
-			(it->second) = ""; // This will delete the attribute
-		}
+	if((it = m_pInternal->m_mAttributes.find(std::string(key))) != m_pInternal->m_mAttributes.end()) {
+		(it->second) = ""; // This will delete the attribute
+		return true;
+	}
+
+	return false;
 }
 
 void DifImage::writeMeta(const char* key, const char *value) {
-		std::map<std::string, std::string>::iterator it;
+	std::map<std::string, std::string>::iterator it;
 		
-		if((it = m_pInternal->m_mAttributes.find(std::string(key))) != m_pInternal->m_mAttributes.end()) {
-			(it->second) = std::string(value);
-		} else {
-			m_pInternal->m_mAttributes[std::string(key)] = std::string(value);
-		}
+	if((it = m_pInternal->m_mAttributes.find(std::string(key))) != m_pInternal->m_mAttributes.end()) {
+		(it->second) = std::string(value);
+	} else {
+		m_pInternal->m_mAttributes[std::string(key)] = std::string(value);
+	}
 }

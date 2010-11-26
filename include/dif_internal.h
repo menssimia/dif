@@ -48,7 +48,8 @@
 	#include <H5Opublic.h>
 #endif // HDF5_1_80
 
-#define ATTRIBUTE_NS "dif_meta_attributes"
+#define ATTRIBUTE_NS   "dif_meta_attributes"
+#define INFORMATION_S  "dif_meta_header"
 
 // TODO Error managment
 
