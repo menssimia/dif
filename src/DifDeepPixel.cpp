@@ -63,10 +63,12 @@ DifPixel* DifDeepPixel::getAtDepth(double dpt) {
 }
 
 /**
- * Resort the depth samples. (has to be executed if you change the depth of some pixel elements.)
+ * Resort depth samples. (has to be executed if you change the depth of/add some pixel elements.)
  */
 void DifDeepPixel::sort() {
 	if(m_qValues.size() == 0) return;
+
+	m_qValues.resize(m_qValues.size());
 
 	std::sort(m_qValues.begin(), m_qValues.end(), sortComparator);
 
