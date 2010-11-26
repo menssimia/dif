@@ -170,3 +170,29 @@ void DifImageInternal::loadMetadata() {
 
 	H5Gclose(grp);
 }
+
+void DifImageInternal::writeIntegerAttribute(hid_t grp, const std::string& attrname, int value) {
+	hid_t attr = -1;
+	hid_t sp = -1;
+
+
+	if(H5Aexists(grp, attrname.c_str())) {
+		attr = H5Aopen(grp, attrname.c_str(), H5P_DEFAULT);
+	} else {
+		sp  = H5Screate(H5S_SCALAR);
+
+		attr = H5Acreate(grp, attrname.c_str(), H5T_NATIVE_INT, sp, H5P_DEFAULT);
+	}
+
+	H5Awrite(attr, H5T_NATIVE_INT, &value);
+
+	H5Aclose(attr);
+
+	if(sp != -1) {
+		H5Sclose(sp);
+	}
+}
+
+int  DifImageInternal::readIntegerAttribute(hid_t grp, const std::string& attrname, int deval) {
+
+}

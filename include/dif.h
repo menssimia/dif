@@ -114,7 +114,7 @@ class DifImage {
 		 * @param[in] key Attribute key
 		 * @param[in] value Value
 		 * @note This function does not actually write the attributes to disk till you 
-		 *      call DifImage::sync()
+		 *       call DifImage::sync()
 		 */
 		void writeMeta(const char* key, const char *value);
 

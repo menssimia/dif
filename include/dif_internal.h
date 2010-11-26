@@ -69,6 +69,9 @@ class DifImageInternal {
 	
 		hid_t openCreateGroup(hid_t loc, const char *name);
 
+		void writeIntegerAttribute(hid_t grp, const std::string& attrname, int value);
+		int  readIntegerAttribute(hid_t grp, const std::string& attrname, int deval=0);
+
 	public:
 		hid_t m_hFile; // File instance
 		std::map<std::string, std::string> m_mAttributes;
