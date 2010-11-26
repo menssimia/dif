@@ -39,6 +39,16 @@ POSSIBILITY OF SUCH DAMAGE.
 		if(a > -1 && b > -1) break;                                            \
 	}
 
+DifPixel& DifEvaluatorAbsolute(DifDeepPixel& dp, double depth) {
+	DifPixel * handle = dp.getAtDepth(depth);
+
+	if(handle != NULL) {
+		return *handle;
+	} else {
+		return *(new DifPixel(0.0, 0.0, 0.0, 0.0, 0.0));
+	}	
+}
+
 DifPixel& DifEvaluatorConstantMedian(DifDeepPixel& dp, double depth) {
 	if(dp.samples() == 0) {
 		return *(new DifPixel(0.0, 0.0, 0.0, 0.0, 0.0));

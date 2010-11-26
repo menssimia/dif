@@ -34,6 +34,8 @@ class DifDeepPixel;
 
 typedef DifPixel& (*DifDepthEvaluator)(DifDeepPixel&, double);
 
+DifPixel& DifEvaluatorAbsolute(DifDeepPixel& dp, double depth);
 DifPixel& DifEvaluatorConstantMedian(DifDeepPixel& dp, double depth);
+
 
 #endif // DIFEVALUATORS_H

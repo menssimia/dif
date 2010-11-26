@@ -29,6 +29,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include <dif_pixel.h>
 
+#include <assert.h>
+
 /**
  * @class DifPixel
  *
@@ -103,6 +105,8 @@ bool DifPixel::set(const DifPixel& src) {
  * @warning There no index range checks. (valid range is 0..nchannel-1)
  */
 double& DifPixel::operator[](unsigned int idx) {
+	assert(idx < m_iChannels);
+
 	return m_pData[idx];
 }
 
