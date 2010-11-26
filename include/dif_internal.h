@@ -40,6 +40,7 @@
 #include <string>
 #include <map>
 #include <assert.h>
+#include <stdbool.h>
 
 #include <hdf5.h>
 

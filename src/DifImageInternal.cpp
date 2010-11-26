@@ -58,14 +58,26 @@ void DifImageInternal::sync() {
 
 void DifImageInternal::writeMetadata(hid_t grp, const std::string& key, const std::string& value) {
 	hid_t attr = -1;
+	hid_t sp = -1;
+	hid_t att = -1;
 
 	if(H5Aexists(grp, key.c_str())) {
 		attr = H5Aopen(grp, key.c_str(), H5P_DEFAULT);
 	} else {
+		att = H5Tcopy(H5T_C_S1);
+		H5Tset_strpad(att, H5T_STR_NULLTERM);
 
+		sp  = H5Screate(H5S_SCALAR);
+
+		attr = H5Acreate(grp, key.c_str(), att, sp, H5P_DEFAULT);
 	}
 
 	H5Aclose(attr);
+
+	if(sp != -1) {
+		H5Tclose(att);
+		H5Sclose(sp);
+	}
 }
 
 void DifImageInternal::writeMetadata() {
@@ -73,7 +85,7 @@ void DifImageInternal::writeMetadata() {
 
 	hid_t grp = -1;
 
-	if(H5Lexists(m_hFile, ATTRIBUTE_NS, H5P_DEFAULT)) {
+	if(H5Lexists(m_hFile, ATTRIBUTE_NS, H5P_DEFAULT) == 0) {
 		grp = H5Gcreate(m_hFile, ATTRIBUTE_NS, H5P_DEFAULT);
 	} else {
 		grp = H5Gopen(m_hFile, ATTRIBUTE_NS);
@@ -84,6 +96,7 @@ void DifImageInternal::writeMetadata() {
 	std::map<std::string, std::string>::iterator it;
 
 	for(it = m_mAttributes.begin(); it != m_mAttributes.end(); it++) {
+		// TODO check for empty values and delete these attributes instead. 
 		writeMetadata(grp, (it->first), (it->second));
 	}
 
