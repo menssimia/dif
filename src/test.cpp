@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 
 	printf("evaluate=%f\n", (px->evaluate(5)).depth());
 
-	DifImage* img = DifImage::open("test.dif", 2, 2, 4, 3, DifImage::f16Bit);
+	DifImage* img = DifImage::open("test.dif"/*, 2, 2, 4, 3, DifImage::f16Bit*/);
 
 	if(!img) {
 		printf("Error: %s\n", strerror(errno));

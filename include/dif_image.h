@@ -75,6 +75,7 @@ class DifImage {
 		~DifImage();
 
 		void updateHeader();
+		void printHeader();
 
 	private:
 		FILE *m_pFile;
