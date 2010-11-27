@@ -43,13 +43,13 @@ class DifImage {
 	public:
 		/// Storage formats
 		typedef enum {
-			fInvalid, ///< Invalid
-			f8Bit,    ///< 8 Bit
-			f16Bit,   ///< 16 Bit
-			f32Bit,   ///< 32 Bit
-			f64Bit,   ///< 64 Bit
-			fSReal,   ///< Single precision real
-			fDReal    ///< Double precision real
+			fInvalid = -1, ///< Invalid
+			f8Bit  = 0,    ///< 8 Bit
+			f16Bit = 1,    ///< 16 Bit
+			f32Bit = 2,    ///< 32 Bit
+			f64Bit = 3,    ///< 64 Bit
+			fSReal = 4,    ///< Single precision real
+			fDReal = 5     ///< Double precision real
 		} DifDataFormat;
 
 		/*! 
@@ -111,7 +111,7 @@ class DifImage {
 
 
 		/*!
-		 * Retrieves the Raw Channel Data
+		 * @brief Retrieves the Raw Channel Data
 		 * @param[in] channel Name of the channel
 		 * @param[in] x X Position
 		 * @param[in] y Y Position
@@ -125,7 +125,20 @@ class DifImage {
 		 */
 		unsigned int channelData(const char *channel, unsigned int x, 
 								 unsigned int y, void* outdata, void *outdepth);
+
 		//TODO }
+
+		/// Retrieves the compression level
+		unsigned char compression() const;
+		
+		/*!
+		 * @brief Sets the compression level to @a compression
+		 * @note The compression will append on newly created channels from then 
+		 *       on. (Will be saved in file)
+		 * @param[in] compression Compression level (valid range is 0..9)
+		 * @return true on success false if @a compression is out of range
+		 */
+		bool setCompression(unsigned char compression);
 
 		/*!
 		 * @brief Query image resolution

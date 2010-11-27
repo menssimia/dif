@@ -22,7 +22,7 @@ void read() {
 	if(!img) {
 		printf("Error while loading file\n");
 		return;
-	}
+	} 
 
 	printf("attribute \"MyKey\" is %s\n", img->meta("MyKey"));
 	printf("attribute \"emptyKey\" is %s\n", img->meta("emptyKey", "I am really empty"));

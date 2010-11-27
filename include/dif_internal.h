@@ -38,15 +38,26 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include <map>
 #include <assert.h>
 #include <stdbool.h>
 
+
+// HF5's C++ API sucks
 #include <hdf5.h>
+#include <H5PTpublic.h>
 
 #ifdef HDF5_1_80
 	#include <H5Opublic.h>
 #endif // HDF5_1_80
+
+typedef struct {
+	void *value;
+	void *depth;
+} DifDepthBuffer;
+
+typedef std::vector<DifDepthBuffer*> DifChannelDepthBuffer;
 
 #define ATTRIBUTE_NS   "dif_meta_attributes"
 #define CHANNEL_NS     "dif_meta_channels"
@@ -55,7 +66,8 @@
 
 class DifImageInternal {
 	public:
-		DifImageInternal(const char *filename, bool create = false, int xres = 0, int yres = 0);
+		DifImageInternal(const char *filename, bool create = false, int xres = 0, 
+						 int yres = 0, int format = 1);
 		~DifImageInternal();
 
 		bool valid() const;
@@ -77,6 +89,8 @@ class DifImageInternal {
 		void writeChannels();
 		void loadChannels();
 
+		void writePixel(hid_t loc, const std::string& name, DifChannelDepthBuffer buffer, unsigned pos);
+
 	public:
 		hid_t m_hFile; // File instance
 		std::map<std::string, std::string> m_mAttributes;
@@ -84,6 +98,8 @@ class DifImageInternal {
 
 		unsigned int m_iX;
 		unsigned int m_iY;
+		unsigned char m_iCompression;
+		int           m_iDepthFormat;
 };
 
 #endif //DIFINTERNAL

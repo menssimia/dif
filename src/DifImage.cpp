@@ -58,9 +58,11 @@ DifImage* DifImage::open(const char *path, unsigned int xres, unsigned int yres,
 
 	DifImage *handle = new DifImage();
 
-	handle->m_pInternal = new DifImageInternal(path, true, xres, yres);
+	handle->m_pInternal = new DifImageInternal(path, true, xres, yres, format);
 
 	if(handle->m_pInternal->valid() == false) return NULL;
+
+	handle->setCompression(compression);
 
 	return handle;
 }
@@ -130,4 +132,16 @@ void DifImage::writeMeta(const char* key, const char *value) {
 void DifImage::resolution(unsigned int &x, unsigned int &y) const {
 	x = m_pInternal->m_iX;
 	y = m_pInternal->m_iY;
+}
+
+unsigned char DifImage::compression() const {
+	return m_pInternal->m_iCompression;
+}
+
+bool DifImage::setCompression(unsigned char compression) {
+	if(compression > 9) return false;
+
+	m_pInternal->writeIntegerAttribute(m_pInternal->m_hFile, "Compression", compression);
+
+	return true;
 }
