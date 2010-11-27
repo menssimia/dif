@@ -35,36 +35,34 @@
 #include <dif_internal.h>
 #undef DIF_INTERN
 
+using namespace Internal;
+
 DifImage::DifImage() : m_pInternal(NULL) {
 
 }
 
 DifImage::~DifImage() {
-	if(m_pInternal) delete m_pInternal;
+
 }
 
 DifImage* DifImage::open(const char *path) {
-	DifImage *handle = new DifImage();
+	DifImage *img = new DifImage;
+	
+	img->m_pInternal = new DifImageInternal(path, false);
 
-	handle->m_pInternal = new DifImageInternal(path, false);
-
-	if(handle->m_pInternal->valid() == false) return NULL;
-
-	return handle;
+	return (img->m_pInternal->valid()) ? img : NULL;
 }
 
-DifImage* DifImage::open(const char *path, unsigned int xres, unsigned int yres, DifDataFormat format, unsigned char compression) {
-	if(xres < 1 || yres < 1 || compression > 9 || format == fInvalid) return NULL;
+DifImage* DifImage::open(const char *path, unsigned int xres, unsigned int yres, unsigned char compression) {
+	if(xres < 1 || yres < 1 || compression > 9) return NULL;
 
-	DifImage *handle = new DifImage();
+	DifImage *img = new DifImage;	
 
-	handle->m_pInternal = new DifImageInternal(path, true, xres, yres, format);
+	img->m_pInternal = new DifImageInternal(path, true, xres, yres, compression);
 
-	if(handle->m_pInternal->valid() == false) return NULL;
+	img->setCompression(compression);
 
-	handle->setCompression(compression);
-
-	return handle;
+	return (img->m_pInternal->valid()) ? img : NULL;
 }
 
 unsigned long DifImage::formatToSize(DifDataFormat format) {
@@ -85,6 +83,30 @@ unsigned long DifImage::formatToSize(DifDataFormat format) {
 	}
 
 	return 0;
+}
+
+DifImage::DifDataFormat DifImage::numberToFormat(unsigned char num) {
+	switch(num) {
+		case 0:
+			return f8Bit;
+		case 1:
+			return f16Bit;
+		case 2:
+			return f32Bit;
+		case 3:
+			return f64Bit;
+
+		case 4:
+			return fSReal;
+		case 5:
+			return fDReal;
+	}
+
+	return fInvalid;
+}
+
+unsigned long DifImage::numberToSize(unsigned char num) {
+	return formatToSize(numberToFormat(num));
 }
 
 void DifImage::release() {
@@ -141,7 +163,8 @@ unsigned char DifImage::compression() const {
 bool DifImage::setCompression(unsigned char compression) {
 	if(compression > 9) return false;
 
-	m_pInternal->writeIntegerAttribute(m_pInternal->m_hFile, "Compression", compression);
+	m_pInternal->m_iCompression = compression;
+	m_pInternal->updateHeader();
 
 	return true;
 }

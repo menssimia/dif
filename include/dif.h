@@ -32,7 +32,9 @@
 #ifndef DIF_H
 #define DIF_H
 
+namespace Internal {
 class DifImageInternal; // So we don't waste the interface
+}
 
 /*!
  * @brief Deep Image File Format interface class.
@@ -64,12 +66,11 @@ class DifImage {
 		 * @param[in] path A valid file path
 		 * @param[in] xres X Resolution of the image
 		 * @param[in] yres Y Resolution of the image
-		 * @param[in] format Storage format of the depth Channel
 		 * @param[in] compression Compression level (valid range is 0..9)
 		 * @return Pointer to a DifImage instance or 0
 		 */
 		static DifImage* open(const char *path, unsigned int xres, 
-							  unsigned int yres, DifDataFormat format = f16Bit,
+							  unsigned int yres,
 							  unsigned char compression = 0);
 
 		/*! 
@@ -78,6 +79,21 @@ class DifImage {
 		 * @return Size of the format (fInvalid will result in 0)
 		 */	
 		static unsigned long formatToSize(DifDataFormat format);
+
+		/*! 
+		 * @brief Returns the Data format associated to the given number
+		 * @param[in] num Storage format number
+		 * @return The Dataformat or fInvalid
+		 */
+		static DifDataFormat numberToFormat(unsigned char num);
+
+		/*! 
+		 * @brief Returns the Data size of the storage format associated to 
+		 * the given number
+		 * @param[in] num Storage format number
+		 * @return Size of the Storage type(or 0)
+		 */
+		static unsigned long numberToSize(unsigned char num);
 
 	public:
 
@@ -111,20 +127,36 @@ class DifImage {
 
 
 		/*!
-		 * @brief Retrieves the Raw Channel Data
+		 * @brief Retrieves Raw Channel Data
 		 * @param[in] channel Name of the channel
 		 * @param[in] x X Position
 		 * @param[in] y Y Position
-		 * @param[out] outdata Data values the buffer must be the size of 
+		 * @param[out] outdata Data values; buffer must be the size of 
 		 *                     the channel's storage format multiplied by the 
-		 *                     samples of the channel on the given positions
-		 * @param[out] outdepth Depth values buffer must be at least the size of 
-		 *                      the depth's storage format multiplied by the amount
+		 *                     samples of the channel on the given position
+		 * @param[out] outdepth Depth values; buffer must be at least the size of 
+		 *                      depth's storage format multiplied by the amount
 		 *                      of samples on the given position
 		 * @return Samples readed.
 		 */
-		unsigned int channelData(const char *channel, unsigned int x, 
+		unsigned int readData(const char *channel, unsigned int x, 
 								 unsigned int y, void* outdata, void *outdepth);
+
+		/*!
+		 * @brief Writes raw channel data
+		 * @param[in] channel Name of the channel
+		 * @param[in] x X Position
+		 * @param[in] y Y Position
+		 * @param[in] nsamples Number of samples present in the following buffers
+		 * @param[in] values Pointer to an array containing @a nsamples values.
+		 * @param[in] depth Pointer to an array containing @a nsamples depth values.
+		 * @param[in] format (Optional) represantation of the data within the given buffers.
+		 *                   (will otherwise take channels data type)
+		 * @return true on success false on error
+		 */
+		bool writeData(const char *channel, unsigned int x, unsigned int y, 
+								 unsigned int nsamples, void *values, void *depth,
+								 DifDataFormat format = fInvalid);
 
 		//TODO }
 
@@ -185,7 +217,7 @@ class DifImage {
 		~DifImage();
 
 	private:
-		DifImageInternal *m_pInternal;
+		Internal::DifImageInternal *m_pInternal;
 };
 
 #endif // DIF_H

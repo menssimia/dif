@@ -42,7 +42,11 @@
 #include <map>
 #include <assert.h>
 #include <stdbool.h>
+#include <cstring>
 
+#include <dif.h>
+
+namespace Internal {
 
 // HF5's C++ API sucks
 #include <hdf5.h>
@@ -52,18 +56,32 @@
 	#include <H5Opublic.h>
 #endif // HDF5_1_80
 
-typedef struct {
-	void *value;
-	void *depth;
-} DifDepthBuffer;
-
-typedef std::vector<DifDepthBuffer*> DifChannelDepthBuffer;
 
 #define ATTRIBUTE_NS   "dif_meta_attributes"
 #define CHANNEL_NS     "dif_meta_channels"
 
 // TODO Error managment
 
+
+class DifChannel {
+	public:
+		DifChannel(const DifImage::DifDataFormat t, const std::string& name);
+		~DifChannel();
+
+		unsigned long size() const;
+		const std::string& name() const;
+
+		hid_t  open(hid_t parent, bool cin = false);
+		static herr_t close(hid_t ch);
+
+	private:
+		DifImage::DifDataFormat m_eFormat;
+		std::string m_sName;
+};
+
+/*!
+ * @brief Internal class do not use directly.
+ */
 class DifImageInternal {
 	public:
 		DifImageInternal(const char *filename, bool create = false, int xres = 0, 
@@ -73,6 +91,7 @@ class DifImageInternal {
 		bool valid() const;
 
 		void sync();
+
 		void writeMetadata();
 		void writeMetadata(hid_t grp, const std::string& key, const std::string& value);
 		void deleteMetadata(hid_t grp, const std::string& key);
@@ -85,21 +104,16 @@ class DifImageInternal {
 		int  readIntegerAttribute(hid_t grp, const std::string& attrname, int defval=0);
 
 		void loadHeader();
-
-		void writeChannels();
-		void loadChannels();
-
-		void writePixel(hid_t loc, const std::string& name, DifChannelDepthBuffer buffer, unsigned pos);
-
+		void updateHeader();
+	
 	public:
 		hid_t m_hFile; // File instance
 		std::map<std::string, std::string> m_mAttributes;
-		std::map<std::string, unsigned int> m_mChannels;
 
 		unsigned int m_iX;
 		unsigned int m_iY;
 		unsigned char m_iCompression;
-		int           m_iDepthFormat;
 };
 
+} // Internal
 #endif //DIFINTERNAL

@@ -32,7 +32,9 @@
 #define DIF_INTERN
 #include <dif_internal.h>
 #undef DIF_INTERN
+#include <dif.h>
 
+using namespace Internal;
 
 DifImageInternal::DifImageInternal(const char *filename, bool create, int xres, 
 								   int yres, int format) : m_hFile(-1) {
@@ -42,8 +44,6 @@ DifImageInternal::DifImageInternal(const char *filename, bool create, int xres,
 
 		writeIntegerAttribute(m_hFile, "XRes", xres);
 		writeIntegerAttribute(m_hFile, "YRes", yres);
-
-		writeIntegerAttribute(m_hFile, "DepthFormat", format);
 
 	} else {
 		m_hFile = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -220,27 +220,12 @@ int  DifImageInternal::readIntegerAttribute(hid_t grp, const std::string& attrna
 	}
 }
 
-void DifImageInternal::writeChannels() {
-	
-}
-
-void DifImageInternal::loadChannels() {
-
-}
-
-void DifImageInternal::writePixel(hid_t loc, const std::string& name, DifChannelDepthBuffer buffer, unsigned pos) {
-	assert(pos < (m_iX * m_iY));
-
-	hid_t grp = H5PTopen(loc, name.c_str());
-
-	assert(grp > 0);
-
-	
-}
-
 void DifImageInternal::loadHeader() {
 	m_iX           = readIntegerAttribute(m_hFile, "XRes", 0);
 	m_iY           = readIntegerAttribute(m_hFile, "YRes", 0);
-	m_iDepthFormat = readIntegerAttribute(m_hFile, "DepthFormat", -1);
 	m_iCompression = readIntegerAttribute(m_hFile, "Compression", 0);
+}
+
+void DifImageInternal::updateHeader() {
+		writeIntegerAttribute(m_hFile, "Compression", m_iCompression);
 }

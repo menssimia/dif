@@ -4,13 +4,14 @@
 #include <cstdio>
 
 void write() {
-	DifImage * img = DifImage::open("test.dif", 2, 2, DifImage::f16Bit);
+	DifImage * img = DifImage::open("test.dif", 2, 2, 6);
 
 	img->writeMeta("MyKey", "MyValue");
 	img->writeMeta("MyKey1", "MyValue4");
 	img->writeMeta("MyKey2", "MyValue5");
 
 	img->writeMeta("emptyKey", "");
+
 
 	img->sync();
 	img->release();
@@ -26,6 +27,8 @@ void read() {
 
 	printf("attribute \"MyKey\" is %s\n", img->meta("MyKey"));
 	printf("attribute \"emptyKey\" is %s\n", img->meta("emptyKey", "I am really empty"));
+
+	printf("compression is %d\n", img->compression());
 }
 
 int main(int argc, char *argv[]) {
