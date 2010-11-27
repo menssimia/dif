@@ -53,8 +53,8 @@ DifImage* DifImage::open(const char *path) {
 	return handle;
 }
 
-DifImage* DifImage::open(const char *path, unsigned int xres, unsigned int yres, DifDataFormat format) {
-	if(xres < 1 || yres < 0) return NULL;
+DifImage* DifImage::open(const char *path, unsigned int xres, unsigned int yres, DifDataFormat format, unsigned char compression) {
+	if(xres < 1 || yres < 1 || compression > 9 || format == fInvalid) return NULL;
 
 	DifImage *handle = new DifImage();
 
@@ -81,6 +81,8 @@ unsigned long DifImage::formatToSize(DifDataFormat format) {
 		case fDReal:
 			return 8;
 	}
+
+	return 0;
 }
 
 void DifImage::release() {

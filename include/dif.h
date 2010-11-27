@@ -65,18 +65,23 @@ class DifImage {
 		 * @param[in] xres X Resolution of the image
 		 * @param[in] yres Y Resolution of the image
 		 * @param[in] format Storage format of the depth Channel
+		 * @param[in] compression Compression level (valid range is 0..9)
 		 * @return Pointer to a DifImage instance or 0
 		 */
-		static DifImage* open(const char *path, unsigned int xres, unsigned int yres, DifDataFormat format = f16Bit);
+		static DifImage* open(const char *path, unsigned int xres, 
+							  unsigned int yres, DifDataFormat format = f16Bit,
+							  unsigned char compression = 0);
 
 		/*! 
 		 * @brief Returns the size in bytes of the given storage format
 		 * @param[in] format Storage format
-		 * @return Size of the format
+		 * @return Size of the format (fInvalid will result in 0)
 		 */	
 		static unsigned long formatToSize(DifDataFormat format);
 
 	public:
+
+		//TODO {
 		/// Returns the amount of channels.
 		unsigned int channels() const;
 	
@@ -86,15 +91,44 @@ class DifImage {
 		 */
 		unsigned int channelSize(unsigned int idx) const;
 
-		/*
-		 * Name of the channel at index @a idx 
+		/*!
+		 * @brief Name of the channel at index @a idx 
 		 * @param[in] idx Channel Index
 		 * @return Name of the channel or null pointer on error
 		 */
 		const char * channelName(unsigned int idx) const;
 
 		/*!
-		 * @brief Query the image resolution
+		 * @brief Add a channel to the file
+		 * @warning Channels cannot be deleted yet so be sure you'll definitly want to add one.
+		 * @note The Filesize will increase drastically with each channel
+		 * @param[in]  name   Channels name
+		 * @param[in]  format Channels data format
+		 * @param[out] idx Channels Index
+		 * @return True on success, false on error
+		 */
+		bool addChannel(const char *name, DifDataFormat format, unsigned int& idx);
+
+
+		/*!
+		 * Retrieves the Raw Channel Data
+		 * @param[in] channel Name of the channel
+		 * @param[in] x X Position
+		 * @param[in] y Y Position
+		 * @param[out] outdata Data values the buffer must be the size of 
+		 *                     the channel's storage format multiplied by the 
+		 *                     samples of the channel on the given positions
+		 * @param[out] outdepth Depth values buffer must be at least the size of 
+		 *                      the depth's storage format multiplied by the amount
+		 *                      of samples on the given position
+		 * @return Samples readed.
+		 */
+		unsigned int channelData(const char *channel, unsigned int x, 
+								 unsigned int y, void* outdata, void *outdepth);
+		//TODO }
+
+		/*!
+		 * @brief Query image resolution
 		 * @param[out] x X Resolution
 		 * @param[out] y Y Resolution
 		 */
@@ -131,6 +165,7 @@ class DifImage {
 		 *       call DifImage::sync()
 		 */
 		void writeMeta(const char* key, const char *value);
+
 
 	protected:
 		DifImage();

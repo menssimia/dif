@@ -216,6 +216,14 @@ int  DifImageInternal::readIntegerAttribute(hid_t grp, const std::string& attrna
 	}
 }
 
+void DifImageInternal::writeChannels() {
+	
+}
+
+void DifImageInternal::loadChannels() {
+
+}
+
 void DifImageInternal::loadHeader() {
 	m_iX = readIntegerAttribute(m_hFile, "XRes", 0);
 	m_iY = readIntegerAttribute(m_hFile, "YRes", 0);

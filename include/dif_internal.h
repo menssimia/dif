@@ -49,7 +49,7 @@
 #endif // HDF5_1_80
 
 #define ATTRIBUTE_NS   "dif_meta_attributes"
-#define INFORMATION_S  "dif_meta_header"
+#define CHANNEL_NS     "dif_meta_channels"
 
 // TODO Error managment
 
@@ -74,9 +74,13 @@ class DifImageInternal {
 
 		void loadHeader();
 
+		void writeChannels();
+		void loadChannels();
+
 	public:
 		hid_t m_hFile; // File instance
 		std::map<std::string, std::string> m_mAttributes;
+		std::map<std::string, unsigned int> m_mChannels;
 
 		unsigned int m_iX;
 		unsigned int m_iY;
