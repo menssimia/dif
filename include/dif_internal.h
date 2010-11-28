@@ -141,6 +141,15 @@ class DifChannelList : public std::list<DifChannel*> {
 			return NULL;
 		}
 
+		DifChannel* operator[](unsigned int idx) {
+			assert(idx < size());
+
+			std::list<DifChannel*>::iterator it = begin();
+			std::advance(it, idx);
+
+			return *it;
+		}
+
 		bool exists(const std::string& in) {
 			return ((*this)[in] != NULL) ? true : false;
 		}
@@ -170,7 +179,7 @@ class DifImageInternal : public DifHD5Util {
 		void loadHeader();
 		void updateHeader();
 
-		bool addChannel(const std::string& name, const DifImage::DifDataFormat t);
+		bool addChannel(const std::string& name, const DifImage::DifDataFormat t, unsigned int& idx);
 	
 	public:
 		hid_t m_hFile; // File instance

@@ -168,3 +168,13 @@ bool DifImage::setCompression(unsigned char compression) {
 
 	return true;
 }
+
+unsigned int DifImage::channels() const {
+	return m_pInternal->m_lChannels.size();
+}
+
+unsigned int DifImage::channelSize(unsigned int idx) const {
+	if(idx > channels()) return 0;
+
+	return m_pInternal->m_lChannels[idx]->size();	
+}

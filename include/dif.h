@@ -97,22 +97,21 @@ class DifImage {
 
 	public:
 
-		//TODO {
 		/// Returns the amount of channels.
-		//unsigned int channels() const;
+		unsigned int channels() const;
 	
 		/*!
 		 * @brief Retrieves the size (in bytes) of the numberic format representing the given channel
 		 * @param[in] idx Channel Index (valid range is 0..channels()-1)
 		 */
-		//unsigned int channelSize(unsigned int idx) const;
+		unsigned int channelSize(unsigned int idx) const;
 
 		/*!
 		 * @brief Name of the channel at index @a idx 
 		 * @param[in] idx Channel Index
 		 * @return Name of the channel or null pointer on error
 		 */
-		//const char * channelName(unsigned int idx) const;
+		const char * channelName(unsigned int idx) const;
 
 		/*!
 		 * @brief Add a channel to the file
@@ -123,9 +122,9 @@ class DifImage {
 		 * @param[out] idx Channels Index
 		 * @return True on success, false on error
 		 */
-		//bool addChannel(const char *name, DifDataFormat format, unsigned int& idx);
+		bool addChannel(const char *name, DifDataFormat format, unsigned int& idx);
 
-
+		//TODO {
 		/*!
 		 * @brief Retrieves Raw Channel Data
 		 * @param[in] channel Name of the channel

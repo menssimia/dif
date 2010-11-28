@@ -193,7 +193,9 @@ void DifImageInternal::updateHeader() {
 	writeIntegerAttribute(m_hFile, "Compression", m_iCompression);
 }
 
-bool DifImageInternal::addChannel(const std::string& name, const DifImage::DifDataFormat t) {
+bool DifImageInternal::addChannel(const std::string& name, const DifImage::DifDataFormat t, unsigned int& idx) {
+	if(m_lChannels.exists(name) == true) return false;
+
 	DifChannel *ch = DifChannel::create(m_hFile, name, t);
 
 	if(ch == NULL) return false;
