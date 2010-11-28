@@ -82,3 +82,22 @@ int  DifHD5Util::readIntegerAttribute(hid_t grp, const std::string& attrname, in
 		return defval;
 	}
 }
+
+hid_t DifHD5Util::formatToHDF5Type(const DifImage::DifDataFormat t) {
+	switch(t) {
+		case DifImage::f8Bit:
+			return H5T_NATIVE_B8;
+		case DifImage::f16Bit:
+			return H5T_NATIVE_B16;
+		case DifImage::f32Bit:
+			return H5T_NATIVE_B32;
+		case DifImage::f64Bit:
+			return H5T_NATIVE_B64;
+		case DifImage::fSReal:
+			return H5T_NATIVE_FLOAT;
+		case DifImage::fDReal:
+			return H5T_NATIVE_DOUBLE;
+	}
+
+	return -1;
+}

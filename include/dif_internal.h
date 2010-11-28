@@ -39,6 +39,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <deque>
 #include <map>
 #include <assert.h>
 #include <stdbool.h>
@@ -51,7 +52,7 @@ namespace Internal {
 
 // HF5's C++ API sucks
 #include <hdf5.h>
-#include <H5PTpublic.h>
+#include <hdf5_hl.h>
 
 #ifdef HDF5_1_80
 	#include <H5Opublic.h>
@@ -59,6 +60,9 @@ namespace Internal {
 
 
 #define ATTRIBUTE_NS   "dif_meta_attributes"
+#define LAYER_NAMING_SCHEME "layer:%f"
+
+class DifImageInternal;
 
 // TODO Error managment
 
@@ -70,6 +74,8 @@ class DifHD5Util {
 		static bool linkExists(hid_t loc, const std::string& name);
 		static void writeIntegerAttribute(hid_t grp, const std::string& attrname, int value);
 		static int  readIntegerAttribute(hid_t grp, const std::string& attrname, int defval=0);
+
+		static hid_t formatToHDF5Type(const DifImage::DifDataFormat t);
 };
 
 /*!
@@ -86,30 +92,26 @@ class DifChannel : public DifHD5Util {
 		hid_t  open(hid_t parent, bool cin = false);
 		static herr_t close(hid_t ch);
 
-		bool inLayer(const std::string& lay);
-
 		void reloadMeta();
 
 		static DifChannel* create(hid_t parent, const std::string& name, const DifImage::DifDataFormat t);
 
 		DifImage::DifDataFormat format() const;
 
+		hid_t getID() const;
+
+		bool layerExists(double depth) const;
+		static std::string getLayerName(double dpt);
+
+
+		bool readLayer(double depth, void* buffer);
+		bool writeLayer(DifImageInternal& intr, double depth, void* buffer);
+
 	private:
 		DifImage::DifDataFormat m_eFormat;
 		std::string m_sName;
 		hid_t m_hId;
 		unsigned int m_iNumberOfLayers;
-};
-
-/*!
- * @brief Internal class do not use directly.
- */
-class DifLayer : public DifHD5Util {
-	public:
-		DifLayer();
-		~DifLayer();
-
-		bool exists(hid_t parent);
 };
 
 /*!

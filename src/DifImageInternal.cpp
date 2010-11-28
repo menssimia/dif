@@ -213,12 +213,10 @@ void DifImageInternal::loadChannelMeta() {
 	H5G_info_t info;
 	H5Gget_info(m_hFile, &info);
 
-	printf("nlinks : %d\n", info.nlinks); /// XXX DEBUG
-
 	for(unsigned int j = 0; j < info.nlinks; j++) {
 
 		// Based upon the h5ex_g_corder.c example
-		size_t sz = H5Lget_name_by_idx(m_hFile, ".", H5_INDEX_NAME, H5_ITER_INC, j, NULL, 0, H5P_DEFAULT) + 1;
+		size_t sz = H5Lget_name_by_idx(m_hFile, ".", H5_INDEX_NAME, H5_ITER_INC, j, NULL, 0, H5P_DEFAULT)+1;
 
 		char *buff = new char[sz];
 
@@ -227,13 +225,7 @@ void DifImageInternal::loadChannelMeta() {
 		if(strcmp(buff, ATTRIBUTE_NS) != 0) {
 			DifChannel *ch = new DifChannel(std::string(buff), m_hFile);
 
-			if(!ch) {
-				return; // FIXME Error handling
-			}
-
 			m_lChannels.push_back(ch);
-
-			printf("Channel's %d named \"%s\" and is mapped at index %d\n", j-1, buff, m_lChannels.size()-1); /// XXX DEBUG
 		}
 
 		delete[] buff;

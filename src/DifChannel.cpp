@@ -74,17 +74,6 @@ herr_t DifChannel::close(hid_t ch) {
 	return H5Gclose(ch);
 }
 
-/// Whether the channel is represented in layer @a lay
-bool DifChannel::inLayer(const std::string& lay) {
-	if(m_hId == -1) return false;
-
-	if(linkExists(m_hId, lay.c_str())) {
-		return true;
-	}
-
-	return false;
-}
-
 /// Reload Metadata associated with the channel
 void DifChannel::reloadMeta() {
 	if(m_hId == -1) return;
@@ -92,7 +81,7 @@ void DifChannel::reloadMeta() {
 	m_eFormat = DifImage::numberToFormat(readIntegerAttribute(m_hId, "StorageFormat", -1));
 
 	H5G_info_t info;
-	H5Gget_info(m_hId, &info); //FIXME Are attributes counting as links?
+	H5Gget_info(m_hId, &info);
 	m_iNumberOfLayers = info.nlinks;
 }
 
@@ -114,4 +103,76 @@ DifChannel* DifChannel::create(hid_t parent, const std::string& name, const DifI
 
 DifImage::DifDataFormat DifChannel::format() const {
 	return m_eFormat;
+}
+
+hid_t DifChannel::getID() const {
+	return m_hId;
+}
+
+std::string DifChannel::getLayerName(double dpt) {
+	size_t sz = strlen(LAYER_NAMING_SCHEME)+15;
+	char *buff = new char[sz];
+	std::string handle;
+
+	snprintf(buff, sz, LAYER_NAMING_SCHEME, dpt);
+
+	handle = buff;
+
+	delete[] buff;
+
+	return handle;
+}
+
+bool DifChannel::layerExists(double depth) const {
+	return linkExists(getID(), getLayerName(depth).c_str());
+}
+
+bool DifChannel::readLayer(double depth, void* buffer) {
+	if(!layerExists(depth)) return false;
+
+	const char *name = getLayerName(depth).c_str();
+
+	switch(format()) {
+		case DifImage::f8Bit:
+			return (H5LTread_dataset_char(getID(), name, (char*)buffer) > 0) ? true : false;
+		case DifImage::f16Bit:
+			return (H5LTread_dataset_short(getID(), name, (short*)buffer) > 0) ? true : false;
+		case DifImage::f32Bit:
+			return (H5LTread_dataset_int(getID(), name, (int*)buffer) > 0) ? true : false;
+		case DifImage::f64Bit:
+			return (H5LTread_dataset_long(getID(), name, (long*)buffer) > 0) ? true : false;
+
+		case DifImage::fSReal:
+			return (H5LTread_dataset_float(getID(), name, (float*)buffer) > 0) ? true : false;
+		case DifImage::fDReal:
+			return (H5LTread_dataset_double(getID(), name, (double*)buffer) > 0) ? true : false;
+	}
+
+	return false;
+}
+
+bool DifChannel::writeLayer(DifImageInternal& intr, double depth, void* buffer) {
+	//TODO: Compression
+
+	hsize_t dims[2] = {intr.m_iX, intr.m_iY};
+
+	const char *name = getLayerName(depth).c_str();
+
+	switch(format()) {
+		case DifImage::f8Bit:
+			return (H5LTmake_dataset_char(getID(), name, 2, dims, (char*)buffer) > 0) ? true : false;
+		case DifImage::f16Bit:
+			return (H5LTmake_dataset_short(getID(), name, 2, dims, (short*)buffer) > 0) ? true : false;
+		case DifImage::f32Bit:
+			return (H5LTmake_dataset_int(getID(), name, 2, dims, (int*)buffer) > 0) ? true : false;
+		case DifImage::f64Bit:
+			return (H5LTmake_dataset_long(getID(), name, 2, dims, (long*)buffer) > 0) ? true : false;
+
+		case DifImage::fSReal:
+			return (H5LTmake_dataset_float(getID(), name, 2, dims, (float*)buffer) > 0) ? true : false;
+		case DifImage::fDReal:
+			return (H5LTmake_dataset_double(getID(), name, 2, dims, (double*)buffer) > 0) ? true : false;
+	}
+
+	return false;
 }

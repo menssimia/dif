@@ -39,6 +39,7 @@ class DifImageInternal; // So we don't waste the interface
 /*!
  * @brief Deep Image File Format interface class.
  * 
+ * @todo Compression is currently not implemented due to a strong deadline.
  * @note The storage format, X and Y resolution cannot be altered once set. 
  */
 class DifImage {
@@ -133,40 +134,34 @@ class DifImage {
 		 */
 		bool addChannel(const char *name, DifDataFormat format, unsigned int& idx);
 
-		//TODO {
 		/*!
-		 * @brief Retrieves Raw Channel Data
-		 * @param[in] channel Name of the channel
-		 * @param[in] x X Position
-		 * @param[in] y Y Position
-		 * @param[out] outdata Data values; buffer must be the size of 
-		 *                     the channel's storage format multiplied by the 
-		 *                     samples of the channel on the given position
-		 * @param[out] outdepth Depth values; buffer must be at least the size of 
-		 *                      depth's storage format multiplied by the amount
-		 *                      of samples on the given position
-		 * @return Samples readed.
+		 * @brief Determines whether the channel @a idx has a determined layer 
+		 * at depth @a dpt.
+		 * @param[in] idx Channel Index
+		 * @param[in] dpt Depth
+		 * @return true or false(also false if @a idx is greater than channels()-1)
 		 */
-		//unsigned int readData(const char *channel, unsigned int x, 
-		//						 unsigned int y, void* outdata, void *outdepth);
+		bool channelAtDepth(unsigned int idx, double dpt) const;
 
 		/*!
-		 * @brief Writes raw channel data
-		 * @param[in] channel Name of the channel
-		 * @param[in] x X Position
-		 * @param[in] y Y Position
-		 * @param[in] nsamples Number of samples present in the following buffers
-		 * @param[in] values Pointer to an array containing @a nsamples values.
-		 * @param[in] depth Pointer to an array containing @a nsamples depth values.
-		 * @param[in] format (Optional) represantation of the data within the given buffers.
-		 *                   (will otherwise take channels data type)
+		 * @brief Reads data from channel @a idx at @a depth into @a buffer
+		 * @param[in] idx Channel Index
+		 * @param[in] depth Depth
+		 * @param[out] buffer Databuffer must be at least the size of the image
+		 *                    multiplied by the size of channels dataformat.
 		 * @return true on success false on error
 		 */
-		//bool writeData(const char *channel, unsigned int x, unsigned int y, 
-		//						 unsigned int nsamples, void *values, void *depth,
-		//						 DifDataFormat format = fInvalid);
+		bool dataRead(unsigned int idx, double depth, void *buffer);
 
-		//TODO }
+		/*!
+		 * @brief Writes data given in @a buffer to channel @a idx at @a depth
+		 * @param[in] idx Channel Index
+		 * @param[in] depth Depth
+		 * @param[in] buffer Databuffer must be at least the size of the image
+		 *                    multiplied by the size of channels dataformat.
+		 * @return true on success false on error
+		 */
+		bool dataWrite(unsigned int idx, double depth, void *buffer);
 
 		/// Retrieves the compression level
 		unsigned char compression() const;

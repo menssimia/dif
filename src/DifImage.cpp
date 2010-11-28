@@ -213,3 +213,21 @@ DifImage::DifDataFormat DifImage::channelFormat(unsigned int idx) const {
 
 	return m_pInternal->m_lChannels[idx]->format();
 }
+
+bool DifImage::channelAtDepth(unsigned int idx, double dpt) const {
+	if(idx > channels()) return false;
+
+	return m_pInternal->m_lChannels[idx]->layerExists(dpt);
+}
+
+bool DifImage::dataRead(unsigned int idx, double depth, void *buffer) {
+	if(idx > channels()) return false;
+
+	return m_pInternal->m_lChannels[idx]->readLayer(depth, buffer);
+}
+
+bool DifImage::dataWrite(unsigned int idx, double depth, void *buffer) {
+	if(idx > channels()) return false;
+
+	return m_pInternal->m_lChannels[idx]->writeLayer(*m_pInternal, depth, buffer);
+}
