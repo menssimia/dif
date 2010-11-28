@@ -88,12 +88,15 @@ class DifChannel : public DifHD5Util {
 
 		bool inLayer(const std::string& lay);
 
+		void reloadMeta();
+
 		static DifChannel* create(hid_t parent, const std::string& name, const DifImage::DifDataFormat t);
 
 	private:
 		DifImage::DifDataFormat m_eFormat;
 		std::string m_sName;
 		hid_t m_hId;
+		unsigned int m_iNumberOfLayers;
 };
 
 /*!

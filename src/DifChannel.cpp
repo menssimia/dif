@@ -40,8 +40,6 @@ using namespace Internal;
 DifChannel::DifChannel(const std::string& name, hid_t id) : m_eFormat(DifImage::fInvalid), m_sName(name), m_hId(-1) {
 	if(id != -1) {
 		m_hId = open(id);
-
-		m_eFormat = DifImage::numberToFormat(readIntegerAttribute(m_hId, "StorageFormat", -1));
 	}
 }
 
@@ -86,14 +84,28 @@ bool DifChannel::inLayer(const std::string& lay) {
 	return false;
 }
 
+void DifChannel::reloadMeta() {
+	if(m_hId == -1) return;
+
+	m_eFormat = DifImage::numberToFormat(readIntegerAttribute(m_hId, "StorageFormat", -1));
+
+	H5G_info_t info;
+	H5Gget_info(m_hId, &info); 
+	m_iNumberOfLayers = info.nlinks;
+}
+
 DifChannel* DifChannel::create(hid_t parent, const std::string& name, const DifImage::DifDataFormat t) {
 	if(linkExists(parent, name.c_str())) {
 		return NULL;
 	}
+		
+	DifChannel *handle = new DifChannel(name, -1);
 
-	hid_t nid =  H5Gcreate(parent, name.c_str(), H5P_DEFAULT);
-	writeIntegerAttribute(nid, "StorageFormat", t);
-	H5Gclose(nid);
+	handle->m_hId =  handle->open(parent, true);
 
-	return new DifChannel(name, parent);
+	writeIntegerAttribute(handle->m_hId, "StorageFormat", t);
+
+	handle->reloadMeta();
+
+	return handle;
 }
