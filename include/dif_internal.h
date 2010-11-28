@@ -69,7 +69,7 @@ class DifHD5Util {
 	public:
 		static bool linkExists(hid_t loc, const std::string& name);
 		static void writeIntegerAttribute(hid_t grp, const std::string& attrname, int value);
-		static int readIntegerAttribute(hid_t grp, const std::string& attrname, int defval=0);
+		static int  readIntegerAttribute(hid_t grp, const std::string& attrname, int defval=0);
 };
 
 /*!
@@ -77,7 +77,7 @@ class DifHD5Util {
  */
 class DifChannel : public DifHD5Util {
 	public:
-		DifChannel(const DifImage::DifDataFormat t, const std::string& name, hid_t id = -1);
+		DifChannel(const std::string& name, hid_t id = -1);
 		~DifChannel();
 
 		unsigned long size() const;

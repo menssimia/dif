@@ -35,9 +35,13 @@
 
 using namespace Internal;
 
-DifChannel::DifChannel(const DifImage::DifDataFormat t, const std::string& name, hid_t id) : m_eFormat(t), m_sName(name), m_hId(-1) {
+// TODO Error handling
+
+DifChannel::DifChannel(const std::string& name, hid_t id) : m_eFormat(DifImage::fInvalid), m_sName(name), m_hId(-1) {
 	if(id != -1) {
 		m_hId = open(id);
+
+		m_eFormat = DifImage::numberToFormat(readIntegerAttribute(m_hId, "StorageFormat", -1));
 	}
 }
 
@@ -88,4 +92,8 @@ DifChannel* DifChannel::create(hid_t parent, const std::string& name, const DifI
 	}
 
 	hid_t nid =  H5Gcreate(parent, name.c_str(), H5P_DEFAULT);
+	writeIntegerAttribute(nid, "StorageFormat", t);
+	H5Gclose(nid);
+
+	return new DifChannel(name, parent);
 }
