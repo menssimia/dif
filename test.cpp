@@ -12,6 +12,11 @@ void write() {
 
 	img->writeMeta("emptyKey", "");
 
+	unsigned int idx = 0;
+	if(img->addChannel("P", DifImage::f64Bit, idx) == false) {
+		printf("Error creating channel\n");
+	}
+
 
 	img->sync();
 	img->release();

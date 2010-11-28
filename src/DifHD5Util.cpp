@@ -36,7 +36,7 @@
 using namespace Internal;
 
 bool DifHD5Util::linkExists(hid_t loc, const std::string& name) {
-	if(H5Aexists(loc, name.c_str())) {
+	if(H5Lexists(loc, name.c_str(), H5P_DEFAULT)) {
 		return true;
 	} else {
 		return false;
@@ -48,7 +48,7 @@ void DifHD5Util::writeIntegerAttribute(hid_t grp, const std::string& attrname, i
 	hid_t sp = -1;
 
 
-	if(linkExists(grp, attrname.c_str())) {
+	if(H5Aexists(grp, attrname.c_str())) {
 		attr = H5Aopen(grp, attrname.c_str(), H5P_DEFAULT);
 	} else {
 		sp  = H5Screate(H5S_SCALAR);
@@ -68,7 +68,7 @@ void DifHD5Util::writeIntegerAttribute(hid_t grp, const std::string& attrname, i
 int  DifHD5Util::readIntegerAttribute(hid_t grp, const std::string& attrname, int defval) {
 	hid_t attr = -1;
 
-	if(linkExists(grp, attrname.c_str())) {
+	if(H5Aexists(grp, attrname.c_str())) {
 		attr = H5Aopen(grp, attrname.c_str(), H5P_DEFAULT);
 
 		int ret;

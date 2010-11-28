@@ -178,3 +178,11 @@ unsigned int DifImage::channelSize(unsigned int idx) const {
 
 	return m_pInternal->m_lChannels[idx]->size();	
 }
+
+const char * DifImage::channelName(unsigned int idx) const {
+	return m_pInternal->m_lChannels[idx]->name().c_str();
+}
+
+bool DifImage::addChannel(const char *name, DifDataFormat format, unsigned int& idx) {
+	return m_pInternal->addChannel(name, format, idx);
+}

@@ -84,7 +84,7 @@ hid_t DifImageInternal::openCreateGroup(hid_t loc, const char *name) {
 void DifImageInternal::deleteMetadata(hid_t grp, const std::string& key) {
 	hid_t attr = -1;
 
-	if(linkExists(grp, key.c_str())) {
+	if(H5Aexists(grp, key.c_str())) {
 		H5Adelete(grp, key.c_str());
 	} 
 }
@@ -97,7 +97,7 @@ void DifImageInternal::writeMetadata(hid_t grp, const std::string& key, const st
 	att = H5Tcopy(H5T_C_S1);
 	H5Tset_size(att, value.size());
 
-	if(linkExists(grp, key.c_str())) {
+	if(H5Aexists(grp, key.c_str())) {
 		attr = H5Aopen(grp, key.c_str(), H5P_DEFAULT);
 	} else {
 		sp  = H5Screate(H5S_SCALAR);
