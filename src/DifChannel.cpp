@@ -111,3 +111,7 @@ DifChannel* DifChannel::create(hid_t parent, const std::string& name, const DifI
 
 	return handle;
 }
+
+DifImage::DifDataFormat DifChannel::format() const {
+	return m_eFormat;
+}

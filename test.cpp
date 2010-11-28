@@ -42,6 +42,12 @@ void read() {
 	printf("attribute \"emptyKey\" is %s\n", img->meta("emptyKey", "I am really empty"));
 
 	printf("compression is %d\n", img->compression());
+
+	printf("I have %d channels:\n", img->channels());
+
+	for(unsigned int i = 0; i < img->channels(); i++) {
+	printf("\t%d: %s with type %s of size %d bytes\n", i, img->channelName(i), DifImage::formatToString(img->channelFormat(i)), img->channelSize(i));		
+	} 
 }
 
 int main(int argc, char *argv[]) {

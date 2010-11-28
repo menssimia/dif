@@ -237,7 +237,5 @@ void DifImageInternal::loadChannelMeta() {
 		}
 
 		delete[] buff;
-		
 	}
-	
 }

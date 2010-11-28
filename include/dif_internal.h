@@ -92,6 +92,8 @@ class DifChannel : public DifHD5Util {
 
 		static DifChannel* create(hid_t parent, const std::string& name, const DifImage::DifDataFormat t);
 
+		DifImage::DifDataFormat format() const;
+
 	private:
 		DifImage::DifDataFormat m_eFormat;
 		std::string m_sName;

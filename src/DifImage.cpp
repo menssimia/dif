@@ -109,6 +109,25 @@ unsigned long DifImage::numberToSize(unsigned char num) {
 	return formatToSize(numberToFormat(num));
 }
 
+const char *DifImage::formatToString(DifDataFormat format) {
+	switch(format) {
+		case fInvalid:
+			return "fInvalid";
+		case f8Bit:
+			return "f8Bit";
+		case f16Bit:
+			return "f16Bit";
+		case f32Bit:
+			return "f32Bit";
+		case f64Bit:
+			return "f64Bit";
+		case fSReal:
+			return "fSReal";
+		case fDReal:
+			return "fDReal";
+	}
+}
+
 void DifImage::release() {
 	sync();
 
@@ -187,4 +206,10 @@ const char * DifImage::channelName(unsigned int idx) const {
 
 bool DifImage::addChannel(const char *name, DifDataFormat format, unsigned int& idx) {
 	return m_pInternal->addChannel(name, format, idx);
+}
+
+DifImage::DifDataFormat DifImage::channelFormat(unsigned int idx) const {
+	if(idx > channels()) return fInvalid;
+
+	return m_pInternal->m_lChannels[idx]->format();
 }

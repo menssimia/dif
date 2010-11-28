@@ -95,6 +95,9 @@ class DifImage {
 		 */
 		static unsigned long numberToSize(unsigned char num);
 
+
+		static const char *formatToString(DifDataFormat format);
+
 	public:
 
 		/// Returns the amount of channels.
@@ -105,6 +108,12 @@ class DifImage {
 		 * @param[in] idx Channel Index (valid range is 0..channels()-1)
 		 */
 		unsigned int channelSize(unsigned int idx) const;
+
+		/*!
+		 * @brief Retrieves the format representing the channel at index @a idx
+		 * @param[in] idx Channel Index (valid range is 0..channels()-1)
+		 */
+		DifDataFormat channelFormat(unsigned int idx) const;
 
 		/*!
 		 * @brief Name of the channel at index @a idx 
