@@ -43,6 +43,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <cstring>
+#include <list>
 
 #include <dif.h>
 
@@ -113,6 +114,41 @@ class DifLayer : public DifHD5Util {
 /*!
  * @brief Internal class do not use directly.
  */
+class DifChannelList : public std::list<DifChannel*> {
+	public:
+		DifChannelList() {}
+		~DifChannelList() {
+			release();
+		}
+		
+		void release() {
+			std::list<DifChannel*>::iterator it;
+
+			for(it = begin(); it != end(); it++) {
+				delete *it;
+			}
+
+			clear();
+		}
+
+		DifChannel* operator[](const std::string& in) {
+			std::list<DifChannel*>::iterator it;
+
+			for(it = begin(); it != end(); it++) {
+				if(in == (*it)->name()) return *it;
+			}
+
+			return NULL;
+		}
+
+		bool exists(const std::string& in) {
+			return ((*this)[in] != NULL) ? true : false;
+		}
+};
+
+/*!
+ * @brief Internal class do not use directly.
+ */
 class DifImageInternal : public DifHD5Util {
 	public:
 		DifImageInternal(const char *filename, bool create = false, int xres = 0, 
@@ -133,10 +169,13 @@ class DifImageInternal : public DifHD5Util {
 
 		void loadHeader();
 		void updateHeader();
+
+		bool addChannel(const std::string& name, const DifImage::DifDataFormat t);
 	
 	public:
 		hid_t m_hFile; // File instance
 		std::map<std::string, std::string> m_mAttributes;
+		DifChannelList m_lChannels; 
 
 		unsigned int m_iX;
 		unsigned int m_iY;

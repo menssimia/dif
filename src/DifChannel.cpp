@@ -37,9 +37,10 @@ using namespace Internal;
 
 // TODO Error handling
 
-DifChannel::DifChannel(const std::string& name, hid_t id) : m_eFormat(DifImage::fInvalid), m_sName(name), m_hId(-1) {
+DifChannel::DifChannel(const std::string& name, hid_t id) : m_eFormat(DifImage::fInvalid), m_sName(name), m_hId(-1), m_iNumberOfLayers(0) {
 	if(id != -1) {
 		m_hId = open(id);
+		reloadMeta();
 	}
 }
 
@@ -84,13 +85,14 @@ bool DifChannel::inLayer(const std::string& lay) {
 	return false;
 }
 
+/// Reload Metadata associated with the channel
 void DifChannel::reloadMeta() {
 	if(m_hId == -1) return;
 
 	m_eFormat = DifImage::numberToFormat(readIntegerAttribute(m_hId, "StorageFormat", -1));
 
 	H5G_info_t info;
-	H5Gget_info(m_hId, &info); 
+	H5Gget_info(m_hId, &info); //FIXME Are attributes counting as links?
 	m_iNumberOfLayers = info.nlinks;
 }
 

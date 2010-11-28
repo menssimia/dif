@@ -55,6 +55,8 @@ DifImageInternal::DifImageInternal(const char *filename, bool create, int xres,
 
 DifImageInternal::~DifImageInternal() {
 	H5Fclose(m_hFile);
+
+	m_lChannels.release();
 }
 
 bool DifImageInternal::valid() const {
@@ -188,5 +190,15 @@ void DifImageInternal::loadHeader() {
 }
 
 void DifImageInternal::updateHeader() {
-		writeIntegerAttribute(m_hFile, "Compression", m_iCompression);
+	writeIntegerAttribute(m_hFile, "Compression", m_iCompression);
+}
+
+bool DifImageInternal::addChannel(const std::string& name, const DifImage::DifDataFormat t) {
+	DifChannel *ch = DifChannel::create(m_hFile, name, t);
+
+	if(ch == NULL) return false;
+
+	m_lChannels.push_back(ch);
+
+	return true;
 }
