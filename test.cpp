@@ -17,6 +17,14 @@ void write() {
 		printf("Error creating channel\n");
 	}
 
+	printf("Ps Index is %d\n", idx);
+
+	if(img->addChannel("U", DifImage::fDReal, idx) == false) {
+		printf("Error creating channel\n");
+	}
+
+	printf("Us Index is %d\n", idx);
+
 
 	img->sync();
 	img->release();

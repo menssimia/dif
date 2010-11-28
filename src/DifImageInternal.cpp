@@ -202,5 +202,7 @@ bool DifImageInternal::addChannel(const std::string& name, const DifImage::DifDa
 
 	m_lChannels.push_back(ch);
 
+	idx = (m_lChannels.size() - 1);
+
 	return true;
 }
