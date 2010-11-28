@@ -59,7 +59,6 @@ namespace Internal {
 
 
 #define ATTRIBUTE_NS   "dif_meta_attributes"
-#define CHANNEL_NS     "dif_meta_channels"
 
 // TODO Error managment
 
@@ -180,6 +179,8 @@ class DifImageInternal : public DifHD5Util {
 		void updateHeader();
 
 		bool addChannel(const std::string& name, const DifImage::DifDataFormat t, unsigned int& idx);
+
+		void loadChannelMeta();
 	
 	public:
 		hid_t m_hFile; // File instance
