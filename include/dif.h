@@ -99,20 +99,20 @@ class DifImage {
 
 		//TODO {
 		/// Returns the amount of channels.
-		unsigned int channels() const;
+		//unsigned int channels() const;
 	
 		/*!
 		 * @brief Retrieves the size (in bytes) of the numberic format representing the given channel
 		 * @param[in] idx Channel Index (valid range is 0..channels()-1)
 		 */
-		unsigned int channelSize(unsigned int idx) const;
+		//unsigned int channelSize(unsigned int idx) const;
 
 		/*!
 		 * @brief Name of the channel at index @a idx 
 		 * @param[in] idx Channel Index
 		 * @return Name of the channel or null pointer on error
 		 */
-		const char * channelName(unsigned int idx) const;
+		//const char * channelName(unsigned int idx) const;
 
 		/*!
 		 * @brief Add a channel to the file
@@ -123,7 +123,7 @@ class DifImage {
 		 * @param[out] idx Channels Index
 		 * @return True on success, false on error
 		 */
-		bool addChannel(const char *name, DifDataFormat format, unsigned int& idx);
+		//bool addChannel(const char *name, DifDataFormat format, unsigned int& idx);
 
 
 		/*!
@@ -139,8 +139,8 @@ class DifImage {
 		 *                      of samples on the given position
 		 * @return Samples readed.
 		 */
-		unsigned int readData(const char *channel, unsigned int x, 
-								 unsigned int y, void* outdata, void *outdepth);
+		//unsigned int readData(const char *channel, unsigned int x, 
+		//						 unsigned int y, void* outdata, void *outdepth);
 
 		/*!
 		 * @brief Writes raw channel data
@@ -154,9 +154,9 @@ class DifImage {
 		 *                   (will otherwise take channels data type)
 		 * @return true on success false on error
 		 */
-		bool writeData(const char *channel, unsigned int x, unsigned int y, 
-								 unsigned int nsamples, void *values, void *depth,
-								 DifDataFormat format = fInvalid);
+		//bool writeData(const char *channel, unsigned int x, unsigned int y, 
+		//						 unsigned int nsamples, void *values, void *depth,
+		//						 DifDataFormat format = fInvalid);
 
 		//TODO }
 
@@ -165,8 +165,8 @@ class DifImage {
 		
 		/*!
 		 * @brief Sets the compression level to @a compression
-		 * @note The compression will append on newly created channels from then 
-		 *       on. (Will be saved in file)
+		 * @note The compression will append to all write operations from 
+		 *       there on. (Will be saved in file)
 		 * @param[in] compression Compression level (valid range is 0..9)
 		 * @return true on success false if @a compression is out of range
 		 */

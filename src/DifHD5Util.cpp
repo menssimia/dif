@@ -35,49 +35,10 @@
 
 using namespace Internal;
 
-DifChannel::DifChannel(const DifImage::DifDataFormat t, const std::string& name, hid_t id) : m_eFormat(t), m_sName(name), m_hId(-1) {
-	if(id != -1) {
-		m_hId = open(id);
-	}
-}
-
-DifChannel::~DifChannel() {
-	if(m_hId != -1) {
-		close(m_hId);
-	}
-}
-
-unsigned long DifChannel::size() const {
-	return DifImage::formatToSize(m_eFormat);
-}
-
-const std::string& DifChannel::name() const {
-	return m_sName;
-}
-
-hid_t  DifChannel::open(hid_t parent, bool cin) {
-	hid_t grp = -1;
-
-	if(linkExists(parent, name().c_str())) {
-		grp = H5Gopen(parent, name().c_str());
-	} else if(cin == true) {
-		grp = H5Gcreate(parent, name().c_str(), H5P_DEFAULT);
-	}
-
-	return grp;
-}
-
-herr_t DifChannel::close(hid_t ch) {
-	return H5Gclose(ch);
-}
-
-/// Whether the channel is represented in layer @a lay
-bool DifChannel::inLayer(const std::string& lay) {
-	if(m_hId == -1) return false;
-
-	if(linkExists(m_hId, lay.c_str())) {
+bool DifHD5Util::linkExists(hid_t loc, const std::string& name) {
+	if(H5Aexists(loc, name.c_str())) {
 		return true;
+	} else {
+		return false;
 	}
-
-	return false;
 }

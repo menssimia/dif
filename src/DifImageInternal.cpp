@@ -70,7 +70,7 @@ void DifImageInternal::sync() {
 hid_t DifImageInternal::openCreateGroup(hid_t loc, const char *name) {
 	hid_t grp = -1;
 
-	if(H5Lexists(loc, name, H5P_DEFAULT)) {
+	if(linkExists(loc, name)) {
 		grp = H5Gopen(loc, name);
 	} else {
 		grp = H5Gcreate(loc, name, H5P_DEFAULT);
@@ -82,7 +82,7 @@ hid_t DifImageInternal::openCreateGroup(hid_t loc, const char *name) {
 void DifImageInternal::deleteMetadata(hid_t grp, const std::string& key) {
 	hid_t attr = -1;
 
-	if(H5Aexists(grp, key.c_str())) {
+	if(linkExists(grp, key.c_str())) {
 		H5Adelete(grp, key.c_str());
 	} 
 }
@@ -95,7 +95,7 @@ void DifImageInternal::writeMetadata(hid_t grp, const std::string& key, const st
 	att = H5Tcopy(H5T_C_S1);
 	H5Tset_size(att, value.size());
 
-	if(H5Aexists(grp, key.c_str())) {
+	if(linkExists(grp, key.c_str())) {
 		attr = H5Aopen(grp, key.c_str(), H5P_DEFAULT);
 	} else {
 		sp  = H5Screate(H5S_SCALAR);
@@ -136,7 +136,7 @@ void DifImageInternal::writeMetadata() {
 }
 
 void DifImageInternal::loadMetadata() {
-	if(!H5Lexists(m_hFile, ATTRIBUTE_NS, H5P_DEFAULT)) return;
+	if(!linkExists(m_hFile, ATTRIBUTE_NS)) return;
 
 	hid_t grp = H5Gopen(m_hFile, ATTRIBUTE_NS);
 	unsigned long nattr = 0;
@@ -152,6 +152,7 @@ void DifImageInternal::loadMetadata() {
 
 	for(unsigned long j = 0; j < nattr; j++) {
 #ifdef HDF5_1_80
+		#error HDF Version 1.80.X is not yet supported.
 		//TODO	
 		/*
 		hid_t attr = H5Aopen_by_idx(grp, ".", j);
@@ -185,7 +186,7 @@ void DifImageInternal::writeIntegerAttribute(hid_t grp, const std::string& attrn
 	hid_t sp = -1;
 
 
-	if(H5Aexists(grp, attrname.c_str())) {
+	if(linkExists(grp, attrname.c_str())) {
 		attr = H5Aopen(grp, attrname.c_str(), H5P_DEFAULT);
 	} else {
 		sp  = H5Screate(H5S_SCALAR);

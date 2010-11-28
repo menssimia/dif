@@ -62,10 +62,20 @@ namespace Internal {
 
 // TODO Error managment
 
-
-class DifChannel {
+/*!
+ * @brief Internal class do not use directly.
+ */
+class DifHD5Util {
 	public:
-		DifChannel(const DifImage::DifDataFormat t, const std::string& name);
+		static bool linkExists(hid_t loc, const std::string& name);
+};
+
+/*!
+ * @brief Internal class do not use directly.
+ */
+class DifChannel : public DifHD5Util {
+	public:
+		DifChannel(const DifImage::DifDataFormat t, const std::string& name, hid_t id = -1);
 		~DifChannel();
 
 		unsigned long size() const;
@@ -74,15 +84,29 @@ class DifChannel {
 		hid_t  open(hid_t parent, bool cin = false);
 		static herr_t close(hid_t ch);
 
+		bool inLayer(const std::string& lay);
+
 	private:
 		DifImage::DifDataFormat m_eFormat;
 		std::string m_sName;
+		hid_t m_hId;
 };
 
 /*!
  * @brief Internal class do not use directly.
  */
-class DifImageInternal {
+class DifLayer : public DifHD5Util {
+	public:
+		DifLayer();
+		~DifLayer();
+
+		bool exists(hid_t parent);
+};
+
+/*!
+ * @brief Internal class do not use directly.
+ */
+class DifImageInternal : public DifHD5Util {
 	public:
 		DifImageInternal(const char *filename, bool create = false, int xres = 0, 
 						 int yres = 0, int format = 1);
