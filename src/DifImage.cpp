@@ -180,6 +180,8 @@ unsigned int DifImage::channelSize(unsigned int idx) const {
 }
 
 const char * DifImage::channelName(unsigned int idx) const {
+	if(idx > channels()) return "";
+
 	return m_pInternal->m_lChannels[idx]->name().c_str();
 }
 
