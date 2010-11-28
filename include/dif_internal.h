@@ -68,6 +68,8 @@ namespace Internal {
 class DifHD5Util {
 	public:
 		static bool linkExists(hid_t loc, const std::string& name);
+		static void writeIntegerAttribute(hid_t grp, const std::string& attrname, int value);
+		static int readIntegerAttribute(hid_t grp, const std::string& attrname, int defval=0);
 };
 
 /*!
@@ -85,6 +87,8 @@ class DifChannel : public DifHD5Util {
 		static herr_t close(hid_t ch);
 
 		bool inLayer(const std::string& lay);
+
+		static DifChannel* create(hid_t parent, const std::string& name, const DifImage::DifDataFormat t);
 
 	private:
 		DifImage::DifDataFormat m_eFormat;
@@ -123,9 +127,6 @@ class DifImageInternal : public DifHD5Util {
 		void loadMetadata();
 	
 		hid_t openCreateGroup(hid_t loc, const char *name);
-
-		void writeIntegerAttribute(hid_t grp, const std::string& attrname, int value);
-		int  readIntegerAttribute(hid_t grp, const std::string& attrname, int defval=0);
 
 		void loadHeader();
 		void updateHeader();

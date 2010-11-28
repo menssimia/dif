@@ -81,3 +81,11 @@ bool DifChannel::inLayer(const std::string& lay) {
 
 	return false;
 }
+
+DifChannel* DifChannel::create(hid_t parent, const std::string& name, const DifImage::DifDataFormat t) {
+	if(linkExists(parent, name.c_str())) {
+		return NULL;
+	}
+
+	hid_t nid =  H5Gcreate(parent, name.c_str(), H5P_DEFAULT);
+}

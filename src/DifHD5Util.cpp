@@ -42,3 +42,43 @@ bool DifHD5Util::linkExists(hid_t loc, const std::string& name) {
 		return false;
 	}
 }
+
+void DifHD5Util::writeIntegerAttribute(hid_t grp, const std::string& attrname, int value) {
+	hid_t attr = -1;
+	hid_t sp = -1;
+
+
+	if(linkExists(grp, attrname.c_str())) {
+		attr = H5Aopen(grp, attrname.c_str(), H5P_DEFAULT);
+	} else {
+		sp  = H5Screate(H5S_SCALAR);
+
+		attr = H5Acreate(grp, attrname.c_str(), H5T_NATIVE_INT, sp, H5P_DEFAULT);
+	}
+
+	H5Awrite(attr, H5T_NATIVE_INT, &value);
+
+	H5Aclose(attr);
+
+	if(sp != -1) {
+		H5Sclose(sp);
+	}
+}
+
+int  DifHD5Util::readIntegerAttribute(hid_t grp, const std::string& attrname, int defval) {
+	hid_t attr = -1;
+
+	if(linkExists(grp, attrname.c_str())) {
+		attr = H5Aopen(grp, attrname.c_str(), H5P_DEFAULT);
+
+		int ret;
+
+		H5Aread(attr, H5T_NATIVE_INT, &ret);
+
+		H5Aclose(attr);
+
+		return ret;
+	} else {
+		return defval;
+	}
+}
