@@ -5,7 +5,7 @@
 
 #include <cassert>
 
-#define DIM 40
+#define DIM 4
 
 void write() {
 	DifImage * img = DifImage::open("test.dif", DIM, DIM, 6);
@@ -16,11 +16,11 @@ void write() {
 	}
 
 
-	if(img->addChannel("U", DifImage::f8Bit, idx) == false) {
+	if(img->addChannel("U", DifImage::f32Bit, idx) == false) {
 		printf("Error creating channel\n");
 	}
 
-	char c[DIM][DIM];
+	int c[DIM][DIM];
 
 	for(int j=0; j < DIM; j++) {
 		for(int k=0; k < DIM; k++) {
@@ -30,9 +30,9 @@ void write() {
 
 	assert(img->dataWrite(idx, 0, c));
 
-	c[34][18] = 71;
+	c[1][1] = 71;
 
-	img->dataWrite(idx, 12, c);
+	assert(img->dataWrite(idx, 12, c));
 
 	img->sync();
 	img->release();
@@ -53,9 +53,15 @@ void read() {
 		printf("\t%d: %s with type %s of size %d bytes\n", i, img->channelName(i), DifImage::formatToString(img->channelFormat(i)), img->channelSize(i));
 
 		if(strcmp(img->channelName(i), "U") == 0) {
-			char c[DIM][DIM];
+			int c[DIM][DIM];
 
-			img->dataRead(i, 12, c);
+			for(int j=0; j < DIM; j++) {
+				for(int k=0; k < DIM; k++) {
+					c[j][k] = 0;
+				}
+			}
+
+			assert(img->dataRead(i, 12, c));
 		
 			for(int j=0; j < DIM; j++) {
 				for(int k=0; k < DIM; k++) {

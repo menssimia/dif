@@ -120,6 +120,8 @@ bool DifHD5Util::write(const DifImage::DifDataFormat t, hid_t loc,
 
 	if(t == DifImage::fInvalid) return false;
 
+	printf("Write %s {%s}\n", name, DifImage::formatToString(t));
+
 	assert(buffer);
 
 	hid_t sp = -1;
@@ -130,10 +132,14 @@ bool DifHD5Util::write(const DifImage::DifDataFormat t, hid_t loc,
 	}
 
 	if(linkExists(loc, name) == false) {
-		printf("create\n");
 		if((dset = H5Dcreate2(loc, name, formatToHDF5Type(t), sp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
 			H5Sclose(sp);
 			return false;
+		}
+	} else {
+		if((dset = H5Dopen(loc, name)) < 0) {
+			H5Sclose(sp);
+			return false;			
 		}
 	}
 
@@ -151,4 +157,22 @@ bool DifHD5Util::write(const DifImage::DifDataFormat t, hid_t loc,
 
 bool DifHD5Util::read(const DifImage::DifDataFormat t, hid_t loc, const char *name, void *buffer) {
 	printf("Read %s {%s}\n", name, DifImage::formatToString(t));
+
+	if(t == DifImage::fInvalid || linkExists(loc, name) == false) {
+		return false;
+	}
+
+	hid_t dset = -1;
+
+	if((dset = H5Dopen(loc, name)) < 0) {
+		return false;
+	}
+
+	if(H5Dread(dset, formatToHDF5Type(t), H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer) < 0) {
+		H5Dclose(dset);
+		return false;
+	}
+
+	H5Dclose(dset);
+	return true;
 }
