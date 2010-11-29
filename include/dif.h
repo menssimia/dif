@@ -96,7 +96,11 @@ class DifImage {
 		 */
 		static unsigned long numberToSize(unsigned char num);
 
-
+		/*!
+		 * @brief Retrieves a string representation of the given format
+		 * @param[in] format The format
+		 * @return Pointer to a statical linked string
+		 */
 		static const char *formatToString(DifDataFormat format);
 
 	public:

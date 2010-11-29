@@ -3,6 +3,8 @@
 #include <cstring>
 #include <cstdio>
 
+#include <cassert>
+
 #define DIM 40
 
 void write() {
@@ -25,6 +27,10 @@ void write() {
 			c[j][k] = 0;
 		}
 	}
+
+	assert(img->dataWrite(idx, 0, c));
+
+	c[34][18] = 71;
 
 	img->dataWrite(idx, 12, c);
 
@@ -62,6 +68,33 @@ void read() {
 	}
 
 	
+}
+
+void datatest() {
+#define RES 4
+
+DifImage * img = DifImage::open("fourXfourExample.dif", RES, RES, 0);
+
+unsigned int r, g, b;
+
+img->addChannel("R", DifImage::f16Bit, r);
+img->addChannel("G", DifImage::f16Bit, g);
+img->addChannel("B", DifImage::f16Bit, b);
+
+short somedata[RES][RES] = {
+{1,2,3,4},
+{5,6,7,8},
+{9,10,11,12},
+{13,14,15, 16}
+};
+
+// Write some data to depth 0.0
+img->dataWrite(r, 0.0, somedata);
+
+somedata[2][3] = 82;
+
+// Write some data to depth 2.0
+img->dataWrite(r, 2.0, somedata);
 }
 
 int main(int argc, char *argv[]) {

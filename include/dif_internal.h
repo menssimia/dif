@@ -76,7 +76,17 @@ class DifHD5Util {
 		static int  readIntegerAttribute(hid_t grp, const std::string& attrname, int defval=0);
 
 		static hid_t formatToHDF5Type(const DifImage::DifDataFormat t);
+
+		static bool gzipAvailable();
+
+		static bool write(const DifImage::DifDataFormat t, hid_t loc, 
+						  const char *name, int rank, const hsize_t *dims, 
+						  void *buffer, unsigned char compression = 0);
+
+		static bool read(const DifImage::DifDataFormat t, hid_t loc, const char *name,
+						 void *buffer);
 };
+
 
 /*!
  * @brief Internal class do not use directly.

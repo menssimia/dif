@@ -132,47 +132,13 @@ bool DifChannel::readLayer(double depth, void* buffer) {
 
 	const char *name = getLayerName(depth).c_str();
 
-	switch(format()) {
-		case DifImage::f8Bit:
-			return (H5LTread_dataset_char(getID(), name, (char*)buffer) > 0) ? true : false;
-		case DifImage::f16Bit:
-			return (H5LTread_dataset_short(getID(), name, (short*)buffer) > 0) ? true : false;
-		case DifImage::f32Bit:
-			return (H5LTread_dataset_int(getID(), name, (int*)buffer) > 0) ? true : false;
-		case DifImage::f64Bit:
-			return (H5LTread_dataset_long(getID(), name, (long*)buffer) > 0) ? true : false;
-
-		case DifImage::fSReal:
-			return (H5LTread_dataset_float(getID(), name, (float*)buffer) > 0) ? true : false;
-		case DifImage::fDReal:
-			return (H5LTread_dataset_double(getID(), name, (double*)buffer) > 0) ? true : false;
-	}
-
-	return false;
+	return read(format(), getID(), name, buffer);
 }
 
 bool DifChannel::writeLayer(DifImageInternal& intr, double depth, void* buffer) {
-	//TODO: Compression
-
 	hsize_t dims[2] = {intr.m_iX, intr.m_iY};
 
 	const char *name = getLayerName(depth).c_str();
 
-	switch(format()) {
-		case DifImage::f8Bit:
-			return (H5LTmake_dataset_char(getID(), name, 2, dims, (char*)buffer) > 0) ? true : false;
-		case DifImage::f16Bit:
-			return (H5LTmake_dataset_short(getID(), name, 2, dims, (short*)buffer) > 0) ? true : false;
-		case DifImage::f32Bit:
-			return (H5LTmake_dataset_int(getID(), name, 2, dims, (int*)buffer) > 0) ? true : false;
-		case DifImage::f64Bit:
-			return (H5LTmake_dataset_long(getID(), name, 2, dims, (long*)buffer) > 0) ? true : false;
-
-		case DifImage::fSReal:
-			return (H5LTmake_dataset_float(getID(), name, 2, dims, (float*)buffer) > 0) ? true : false;
-		case DifImage::fDReal:
-			return (H5LTmake_dataset_double(getID(), name, 2, dims, (double*)buffer) > 0) ? true : false;
-	}
-
-	return false;
+	return write(format(), getID(), name, 2, dims, buffer, intr.m_iCompression);
 }

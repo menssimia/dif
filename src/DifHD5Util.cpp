@@ -101,3 +101,54 @@ hid_t DifHD5Util::formatToHDF5Type(const DifImage::DifDataFormat t) {
 
 	return -1;
 }
+
+bool DifHD5Util::gzipAvailable() {
+    unsigned int finfo;
+
+	if(H5Zfilter_avail(H5Z_FILTER_DEFLATE)) {
+		H5Zget_filter_info (H5Z_FILTER_DEFLATE, &finfo);
+
+		return (finfo & H5Z_FILTER_CONFIG_ENCODE_ENABLED) && (finfo &H5Z_FILTER_CONFIG_DECODE_ENABLED);
+	}
+
+	return false;
+}
+
+bool DifHD5Util::write(const DifImage::DifDataFormat t, hid_t loc, 
+					   const char *name, int rank, const hsize_t *dims, 
+					   void *buffer, unsigned char compression) {
+
+	if(t == DifImage::fInvalid) return false;
+
+	assert(buffer);
+
+	hid_t sp = -1;
+	hid_t dset = -1;
+
+	if((sp = H5Screate_simple(rank, dims, NULL)) < 0) {
+		return false;
+	}
+
+	if(linkExists(loc, name) == false) {
+		printf("create\n");
+		if((dset = H5Dcreate2(loc, name, formatToHDF5Type(t), sp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+			H5Sclose(sp);
+			return false;
+		}
+	}
+
+	if(H5Dwrite(dset, formatToHDF5Type(t), H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer) < 0) {
+		H5Dclose(dset);
+		H5Sclose(sp);
+		return false;
+	}
+
+	H5Dclose(dset);
+	H5Sclose(sp);
+
+	return true;
+}
+
+bool DifHD5Util::read(const DifImage::DifDataFormat t, hid_t loc, const char *name, void *buffer) {
+	printf("Read %s {%s}\n", name, DifImage::formatToString(t));
+}
