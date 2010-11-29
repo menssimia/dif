@@ -114,49 +114,68 @@ bool DifHD5Util::gzipAvailable() {
 	return false;
 }
 
+#define PCLOSE() if(dcpl != H5P_DEFAULT) H5Pclose(dcpl);
+
 bool DifHD5Util::write(const DifImage::DifDataFormat t, hid_t loc, 
 					   const char *name, int rank, const hsize_t *dims, 
 					   void *buffer, unsigned char compression) {
 
 	if(t == DifImage::fInvalid) return false;
 
-	printf("Write %s {%s}\n", name, DifImage::formatToString(t));
+	//printf("Write %s {%s}\n", name, DifImage::formatToString(t));
 
 	assert(buffer);
 
 	hid_t sp = -1;
 	hid_t dset = -1;
+	hid_t dcpl = H5P_DEFAULT;
 
 	if((sp = H5Screate_simple(rank, dims, NULL)) < 0) {
 		return false;
 	}
 
 	if(linkExists(loc, name) == false) {
-		if((dset = H5Dcreate2(loc, name, formatToHDF5Type(t), sp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+		if(compression > 0 && gzipAvailable()) {
+ /*   		dcpl = H5Pcreate(H5P_DATASET_CREATE);
+
+    		if(H5Pset_deflate(dcpl, compression) < 0) {
+				PCLOSE();
+				printf("Dif: Couldn't set compression\n"); ///XXX
+			}
+*/
+		}
+
+		if((dset = H5Dcreate2(loc, name, formatToHDF5Type(t), sp, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
+			PCLOSE();
 			H5Sclose(sp);
 			return false;
 		}
 	} else {
 		if((dset = H5Dopen(loc, name)) < 0) {
+			PCLOSE();
 			H5Sclose(sp);
 			return false;			
 		}
 	}
 
 	if(H5Dwrite(dset, formatToHDF5Type(t), H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer) < 0) {
+		PCLOSE();
 		H5Dclose(dset);
 		H5Sclose(sp);
 		return false;
 	}
 
+	PCLOSE();
 	H5Dclose(dset);
 	H5Sclose(sp);
 
 	return true;
 }
 
+#undef PCLOSE
+
 bool DifHD5Util::read(const DifImage::DifDataFormat t, hid_t loc, const char *name, void *buffer) {
-	printf("Read %s {%s}\n", name, DifImage::formatToString(t));
+	//printf("Read %s {%s}\n", name, DifImage::formatToString(t));
 
 	if(t == DifImage::fInvalid || linkExists(loc, name) == false) {
 		return false;

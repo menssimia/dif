@@ -39,8 +39,7 @@ class DifImageInternal; // So we don't waste the interface
 /*!
  * @brief Deep Image File Format interface class.
  * 
- * @todo Compression is currently not implemented due to a strong deadline.
- * @note The storage format, X and Y resolution cannot be altered once set. 
+ * @note The storage format of channels, X and Y resolution cannot be altered once set. 
  */
 class DifImage {
 	public:
@@ -148,7 +147,7 @@ class DifImage {
 		bool channelAtDepth(unsigned int idx, double dpt) const;
 
 		/*!
-		 * @brief Reads data from channel @a idx at @a depth into @a buffer
+		 * @brief Reads (raw) data from channel @a idx at @a depth into @a buffer
 		 * @param[in] idx Channel Index
 		 * @param[in] depth Depth
 		 * @param[out] buffer Databuffer must be at least the size of the image
@@ -158,7 +157,7 @@ class DifImage {
 		bool dataRead(unsigned int idx, double depth, void *buffer);
 
 		/*!
-		 * @brief Writes data given in @a buffer to channel @a idx at @a depth
+		 * @brief Writes (raw) data given in @a buffer to channel @a idx at @a depth
 		 * @param[in] idx Channel Index
 		 * @param[in] depth Depth
 		 * @param[in] buffer Databuffer must be at least the size of the image
@@ -172,8 +171,8 @@ class DifImage {
 		
 		/*!
 		 * @brief Sets the compression level to @a compression
-		 * @note The compression will append to all write operations from 
-		 *       there on. (Will be saved in file)
+		 * @note The compression will append to all depth layers created from 
+		 *       there on (Will be saved in file)
 		 * @param[in] compression Compression level (valid range is 0..9)
 		 * @return true on success false if @a compression is out of range
 		 */

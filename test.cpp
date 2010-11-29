@@ -8,7 +8,7 @@
 #define DIM 4
 
 void write() {
-	DifImage * img = DifImage::open("test.dif", DIM, DIM, 6);
+	DifImage * img = DifImage::open("test.dif", DIM, DIM, 0);
 
 	unsigned int idx = 0;
 	if(img->addChannel("P", DifImage::f64Bit, idx) == false) {
@@ -28,7 +28,7 @@ void write() {
 		}
 	}
 
-	assert(img->dataWrite(idx, 0, c));
+	assert(img->dataWrite(idx, 1, c));
 
 	c[1][1] = 71;
 
