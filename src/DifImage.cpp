@@ -131,6 +131,7 @@ const char *DifImage::formatToString(DifDataFormat format) {
 void DifImage::release() {
 	sync();
 
+	delete m_pInternal;
 	delete this;
 }
 
