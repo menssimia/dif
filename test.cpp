@@ -26,7 +26,8 @@ int main(int argc, char *argv[]) {
 	field->name = "somefield";
 	field->attribute = "imagefield";
 
-	field->writePixel(V2i(0, 0), V3f(23.0f, 12.0f, 54.0f), 0);
+	field->writePixel(V2i(1, 0), V3f(23.0f, 12.0f, 54.0f), 0);
+	field->writePixel(V2i(0, 0), V3f(23.0f, 12.0f, 53.0f), 1);
 
 	ofp.writeVectorLayer<float>(field);
 
@@ -58,7 +59,15 @@ int main(int argc, char *argv[]) {
 
 	DifField<float> rfield(*rspfield);
 
-	std::cout << rfield.readPixel(V2i(0, 0), 0) << std::endl;
+	bool retval = false;
+
+	std::cout << rfield.getSize() << std::endl;
+
+	std::cout << rfield.readPixel(V2i(0, 0), 1, &retval);
+	std::cout << (retval ? "true" : "false") << std::endl;
+
+	std::cout << rfield.readPixel(V2i(1, 0), 0, &retval);
+	std::cout << (retval ? "true" : "false") << std::endl;
 
 	return 0;
 }

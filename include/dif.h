@@ -94,7 +94,7 @@ template<typename T> DifField<T>& DifField<T>::operator=(const DifField<T>& o) {
 }
 
 template<typename T> FIELD3D_VEC3_T<T> DifField<T>::readPixel(const V2i& pos, unsigned int dpt, bool *retval) {
-	if(m_vSize.x <= pos.x || m_vSize.y <= pos.y || m_vSize.z <= dpt) {
+	if(m_vSize.x < (pos.x - 1) || m_vSize.y < (pos.y - 1) || m_vSize.z < dpt) {
 		if(retval != NULL) {
 			(*retval) = false;
 		}
@@ -106,7 +106,7 @@ template<typename T> FIELD3D_VEC3_T<T> DifField<T>::readPixel(const V2i& pos, un
 		(*retval) = true;
 	}
 
-	return _DIF_TYPE::fastValue(pos.x, pos.y, dpt);
+	return _DIF_TYPE::value(pos.x, pos.y, dpt);
 }
 
 template<typename T> int DifField<T>::depth() const {
@@ -119,11 +119,24 @@ template<typename T> bool DifField<T>::writePixel(const V2i& pos, const FIELD3D_
 	}
 
 	if(depth() <= dpt) {
-		m_vSize.z = dpt;
+		m_vSize.z = dpt+1;
+
+		SparseField< FIELD3D_VEC3_T<T> > tmp(*this);
+
 		_DIF_TYPE::setSize(m_vSize);
+
+		V3i dims = tmp.dataResolution();
+
+		for(int i = 0; i < dims.x; i++) {
+			for(int j = 0; j < dims.y; j++) {
+				for(int k = 0; k < dims.z; k++) {
+					writePixel(V2i(i, j), tmp.value(i, j, k), k);
+				}
+			}
+		}
 	}
 
-	_DIF_TYPE::fastLValue(pos.x, pos.y, dpt) = data;
+	_DIF_TYPE::lvalue(pos.x, pos.y, dpt) = data;
 }
 template<typename T> const V3i& DifField<T>::getSize() const {
 	return m_vSize;
