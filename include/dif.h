@@ -32,198 +32,111 @@
 #ifndef DIF_H
 #define DIF_H
 
-namespace Internal {
-class DifImageInternal; // So we don't waste the interface
-}
+#include <Field3D/Field3DFile.h>
+#include <Field3D/SparseField.h>
 
-/*!
- * @brief Deep Image File Format interface class.
- * 
- * @note The storage format of channels, X and Y resolution cannot be altered once set. 
- */
-class DifImage {
+FIELD3D_NAMESPACE_OPEN
+
+#define _DIF_TYPE SparseField< FIELD3D_VEC3_T<T> >
+
+template<typename T> class DifField : public SparseField< FIELD3D_VEC3_T<T> > {
 	public:
-		/// Storage formats
-		typedef enum {
-			fInvalid = -1, ///< Invalid
-			f8Bit  = 0,    ///< 8 Bit
-			f16Bit = 1,    ///< 16 Bit
-			f32Bit = 2,    ///< 32 Bit
-			f64Bit = 3,    ///< 64 Bit
-			fSReal = 4,    ///< Single precision real
-			fDReal = 5     ///< Double precision real
-		} DifDataFormat;
+		typedef boost::intrusive_ptr<DifField> Ptr;
 
-		/*! 
-		 * @brief Open an existing Dif File
-		 * @param[in] path a valid file path
-		 * @return Pointer to a DifImage instance or 0
-		 */
-		static DifImage* open(const char *path);
+		DifField(const V2i& size, unsigned int initialdepth=0);
+		DifField(const DifField<T>& o);
+		DifField(const _DIF_TYPE& o);
 
-		/*! 
-		 * @brief Creates a new  Dif File
-		 * @param[in] path A valid file path
-		 * @param[in] xres X Resolution of the image
-		 * @param[in] yres Y Resolution of the image
-		 * @param[in] compression Compression level (valid range is 0..9)
-		 * @return Pointer to a DifImage instance or 0
-		 */
-		static DifImage* open(const char *path, unsigned int xres, 
-							  unsigned int yres,
-							  unsigned char compression = 0);
+		DifField& operator=(const DifField<T>& o);
 
-		/*! 
-		 * @brief Returns the size in bytes of the given storage format
-		 * @param[in] format Storage format
-		 * @return Size of the format (fInvalid will result in 0)
-		 */	
-		static unsigned long formatToSize(DifDataFormat format);
+		bool writePixel(const V2i& pos, const FIELD3D_VEC3_T<T> data, unsigned int dpt = 0);
+		FIELD3D_VEC3_T<T> readPixel(const V2i& pos, unsigned int dpt = 0, bool *retval = NULL);
 
-		/*! 
-		 * @brief Returns the Data format associated to the given number
-		 * @param[in] num Storage format number
-		 * @return The Dataformat or fInvalid
-		 */
-		static DifDataFormat numberToFormat(unsigned char num);
+		int depth() const;
 
-		/*! 
-		 * @brief Returns the Data size of the storage format associated to 
-		 * the given number
-		 * @param[in] num Storage format number
-		 * @return Size of the Storage type(or 0)
-		 */
-		static unsigned long numberToSize(unsigned char num);
-
-		/*!
-		 * @brief Retrieves a string representation of the given format
-		 * @param[in] format The format
-		 * @return Pointer to a statical linked string
-		 */
-		static const char *formatToString(DifDataFormat format);
-
-	public:
-
-		/// Returns the amount of channels.
-		unsigned int channels() const;
-	
-		/*!
-		 * @brief Retrieves the size (in bytes) of the numberic format representing the given channel
-		 * @param[in] idx Channel Index (valid range is 0..channels()-1)
-		 */
-		unsigned int channelSize(unsigned int idx) const;
-
-		/*!
-		 * @brief Retrieves the format representing the channel at index @a idx
-		 * @param[in] idx Channel Index (valid range is 0..channels()-1)
-		 */
-		DifDataFormat channelFormat(unsigned int idx) const;
-
-		/*!
-		 * @brief Name of the channel at index @a idx 
-		 * @param[in] idx Channel Index
-		 * @return Name of the channel or null pointer on error
-		 */
-		const char * channelName(unsigned int idx) const;
-
-		/*!
-		 * @brief Add a channel to the file
-		 * @warning Channels cannot be deleted yet so be sure you'll definitly want to add one.
-		 * @note The Filesize will increase drastically with each channel
-		 * @param[in]  name   Channels name
-		 * @param[in]  format Channels data format
-		 * @param[out] idx Channels Index
-		 * @return True on success, false on error
-		 */
-		bool addChannel(const char *name, DifDataFormat format, unsigned int& idx);
-
-		/*!
-		 * @brief Determines whether the channel @a idx has a determined layer 
-		 * at depth @a dpt.
-		 * @param[in] idx Channel Index
-		 * @param[in] dpt Depth
-		 * @return true or false(also false if @a idx is greater than channels()-1)
-		 */
-		bool channelAtDepth(unsigned int idx, double dpt) const;
-
-		/*!
-		 * @brief Reads (raw) data from channel @a idx at @a depth into @a buffer
-		 * @param[in] idx Channel Index
-		 * @param[in] depth Depth
-		 * @param[out] buffer Databuffer must be at least the size of the image
-		 *                    multiplied by the size of channels dataformat.
-		 * @return true on success false on error
-		 */
-		bool dataRead(unsigned int idx, double depth, void *buffer);
-
-		/*!
-		 * @brief Writes (raw) data given in @a buffer to channel @a idx at @a depth
-		 * @param[in] idx Channel Index
-		 * @param[in] depth Depth
-		 * @param[in] buffer Databuffer must be at least the size of the image
-		 *                    multiplied by the size of channels dataformat.
-		 * @return true on success false on error
-		 */
-		bool dataWrite(unsigned int idx, double depth, void *buffer);
-
-		/// Retrieves the compression level
-		unsigned char compression() const;
-		
-		/*!
-		 * @brief Sets the compression level to @a compression
-		 * @note The compression will append to all depth layers created from 
-		 *       there on (Will be saved in file)
-		 * @param[in] compression Compression level (valid range is 0..9)
-		 * @return true on success false if @a compression is out of range
-		 */
-		bool setCompression(unsigned char compression);
-
-		/*!
-		 * @brief Query image resolution
-		 * @param[out] x X Resolution
-		 * @param[out] y Y Resolution
-		 */
-		void resolution(unsigned int &x, unsigned int &y) const;
-		
-		/// Synchronizes any changes to disk
-		void sync();
-
-		/// Closes the DifImage
-		void release();
-
-		/*!
-		 * @brief Retrieves a Metadata attribute
-		 * @param[in] key Attribute key
-		 * @param[in] dflt Return value if attribute does not exists.
-		 * @return the attributes content.
-		 */
-		const char* meta(const char* key, const char *dflt = "") const;
-
-		/*!
-		 * @brief Deletes a Metatdata attribute
-		 * @param[in] key Attribute key
-		 * @return True on succes or false if the attribute does not exists.
-		 */
-		bool deleteMeta(const char* key);
-
-		/*!
-		 * @brief Adds or updates a Metadata attribute
-		 *
-		 * Setting an attribute's value to an empty string will also result in the deletion of the attribute
-		 * @param[in] key Attribute key
-		 * @param[in] value Value
-		 * @note This function does not actually write the attributes to disk till you 
-		 *       call DifImage::sync()
-		 */
-		void writeMeta(const char* key, const char *value);
-
+		const V3i& getSize() const;
 
 	protected:
-		DifImage();
-		~DifImage();
+		virtual void sizeChanged();
 
 	private:
-		Internal::DifImageInternal *m_pInternal;
+		V3i m_vSize; // So we dont need recopmputation through dataResolution()
 };
+
+template<typename T> DifField<T>::DifField(const V2i& size, unsigned int initialdepth) : _DIF_TYPE() {
+	m_vSize.x = size.x;
+	m_vSize.y = size.y;
+
+	if(initialdepth < 1) {
+		m_vSize.z = 1;
+	} else {
+		m_vSize.z = initialdepth;
+	}
+
+	_DIF_TYPE::setSize(m_vSize);
+	_DIF_TYPE::clear( FIELD3D_VEC3_T<T>(0) );
+}
+
+template<typename T> DifField<T>::DifField(const DifField<T>& o) : _DIF_TYPE(o), m_vSize(o.m_vSize) {
+	// Nothing
+}
+
+template<typename T> DifField<T>::DifField(const _DIF_TYPE& o) : _DIF_TYPE(o), m_vSize(0) {
+	m_vSize = _DIF_TYPE::dataResolution();
+}
+
+template<typename T> DifField<T>& DifField<T>::operator=(const DifField<T>& o) {
+	_DIF_TYPE::operator=(o);
+
+	m_vSize = o.m_vSize;
+
+	return *this;
+}
+
+template<typename T> FIELD3D_VEC3_T<T> DifField<T>::readPixel(const V2i& pos, unsigned int dpt, bool *retval) {
+	if(m_vSize.x <= pos.x || m_vSize.y <= pos.y || m_vSize.z <= dpt) {
+		if(retval != NULL) {
+			(*retval) = false;
+		}
+		
+		return FIELD3D_VEC3_T<T> (0);
+	}
+
+	if(retval != NULL) {
+		(*retval) = true;
+	}
+
+	return _DIF_TYPE::fastValue(pos.x, pos.y, dpt);
+}
+
+template<typename T> int DifField<T>::depth() const {
+	return m_vSize.z;
+}
+
+template<typename T> bool DifField<T>::writePixel(const V2i& pos, const FIELD3D_VEC3_T<T> data, unsigned int dpt) {
+	if(pos.x >= m_vSize.x || pos.y >= m_vSize.y) {
+		return false;
+	}
+
+	if(depth() <= dpt) {
+		m_vSize.z = dpt;
+		_DIF_TYPE::setSize(m_vSize);
+	}
+
+	_DIF_TYPE::fastLValue(pos.x, pos.y, dpt) = data;
+}
+template<typename T> const V3i& DifField<T>::getSize() const {
+	return m_vSize;
+}
+
+/* Protected */ template<typename T> void DifField<T>::sizeChanged() {
+	m_vSize = _DIF_TYPE::dataResolution();
+
+	_DIF_TYPE::sizeChanged();
+}
+
+#undef _DIF_TYPE
+
+FIELD3D_NAMESPACE_HEADER_CLOSE 
 
 #endif // DIF_H
