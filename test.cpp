@@ -36,7 +36,7 @@ int fieldtest() {
 
 	ofp.close();
 
-	// Read the File
+	// readPixel the File
 
 	Field3DInputFile ifp;
 
@@ -85,13 +85,23 @@ int main(int argc, char *argv[]) {
 
 	unsigned int r, g, b, a;
 	dif.addChannel("r", r);
-std::cout << "." << std::endl;
 	dif.addChannel("g", g);
-std::cout << "." << std::endl;
 	dif.addChannel("b", b);
-std::cout << "." << std::endl;
 	dif.addChannel("a", a);
-std::cout << "." << std::endl;
+
+
+	float data[4] = {2.0f, 1.0f, 3.0f, 4.0f};
+
+	dif.writeData(V2i(0,0), 0.0f, data);
+	dif.writeData(V2i(0,0), 23.1f, data);
+
+	float odata[4];
+
+	dif.readData(V2i(0,0), 0.0f, odata);
+
+	std::cout << odata[0] << std::endl;
+
+	//return 0;
 
 	Field3DOutputFile ofp;
 

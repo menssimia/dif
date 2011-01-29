@@ -100,14 +100,14 @@ template<typename T> DifField<T>& DifField<T>::operator=(const DifField<T>& o) {
 
 template<typename T> T DifField<T>::readPixel(const V2i& pos, unsigned int dpt, bool *retval) {
 	if(m_vSize.x <= pos.x || m_vSize.y <= pos.y || m_vSize.z <= dpt) {
-		if(retval != NULL) {
+		if(retval) {
 			(*retval) = false;
 		}
 		
 		return T(0);
 	}
 
-	if(retval != NULL) {
+	if(retval) {
 		(*retval) = true;
 	}
 
@@ -179,6 +179,10 @@ template<typename T> class DifImage {
 		unsigned int indexAtDepth(float dpt, bool* retval = 0) const;
 
 		unsigned int depthLevels() const;
+
+		// data must be at least sizeof(T)*numberOfChannels()
+		void writeData(const V2i& pos, float depth, T* data);
+		bool readData(const V2i& pos, float depth, T *buffer);
 		
 	private:
 		typedef std::map<std::string, DifField<T> * > ChannelList;
@@ -293,6 +297,52 @@ template<typename T> unsigned int DifImage<T>::depthLevels() const {
 	return m_lDepthMapping.size();
 }
 
+template<typename T> void DifImage<T>::writeData(const V2i& pos, float depth, T* data) {
+	unsigned int i   = 0;
+	unsigned int idx = 0;
+	bool status = false;
+
+	idx = indexAtDepth(depth, &status);
+
+	if(!status) {
+		m_lDepthMapping.push_back(depth);
+		idx = (m_lDepthMapping.size()-1);
+	}
+
+	ChannelListIter it = m_lChannels.begin();
+
+	for(; it != m_lChannels.end(); it++, i++) {
+		it->second->writePixel(pos, idx, data[i]);
+	}
+}
+
+template<typename T> bool DifImage<T>::readData(const V2i& pos, float depth, T *buffer) {
+	unsigned int idx = 0;
+	unsigned int i   = 0;
+	bool status = false;
+
+	idx = indexAtDepth(depth, &status);
+
+	// Must have at least one channel at the given depth
+	if(!status) {
+		return false;
+	}
+
+	ChannelListIter it = m_lChannels.begin();
+
+	for(; it != m_lChannels.end(); it++, i++) {
+		T handle = it->second->readPixel(pos, idx, &status);
+
+		if(!status) {
+			buffer[i] = T(0);
+		} else {
+			buffer[i] = handle;
+		}
+	}
+
+	return true;
+}
+
 template<typename T> void DifImage<T>::save(Field3DOutputFile& ofp) {
 //	bool scalar = true;
 
@@ -310,9 +360,11 @@ template<typename T> void DifImage<T>::save(Field3DOutputFile& ofp) {
 		DepthMappingListIter dit;
 		unsigned int i = 0;
 
-		for(dit = m_lDepthMapping.begin(); dit != m_lDepthMapping.end(); it++) {
+		for(dit = m_lDepthMapping.begin(); dit != m_lDepthMapping.end(); dit++) {
 			dptmapping.lvalue(0, 0, i) = (*dit);
 			++i;
+
+			//std::cout << "[" << i << "] = " << (float)*dit << std::endl;
 		}
 	}
 
