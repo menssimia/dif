@@ -8,10 +8,7 @@
 
 using namespace Field3D;
 
-
-int main(int argc, char *argv[]) {
-	initIO();
-
+int fieldtest() {
 	Field3DOutputFile ofp;
 
 	if(!ofp.create("test.dif")) {
@@ -51,7 +48,7 @@ int main(int argc, char *argv[]) {
 	Field<float>::Vec rfields = ifp.readScalarLayers<float>();
 
 	if(rfields.size() < 1) {
-		std::cout << "OMG What just happend?!??!?!" << std::endl;
+		std::cout << "OMG What just happend?!?!?!" << std::endl;
 		return -1;
 	}
 
@@ -73,6 +70,37 @@ int main(int argc, char *argv[]) {
 
 	std::cout << rfield.readPixel(V2i(1, 0), 0, &retval);
 	std::cout << (retval ? "true" : "false") << std::endl;
+
+	ofp.close();
+	ifp.close();
+
+}
+
+int main(int argc, char *argv[]) {
+	initIO();
+
+//	fieldtest();
+
+	DifImage<float> dif(V2i(12,12));
+
+	unsigned int r, g, b, a;
+	dif.addChannel("r", r);
+std::cout << "." << std::endl;
+	dif.addChannel("g", g);
+std::cout << "." << std::endl;
+	dif.addChannel("b", b);
+std::cout << "." << std::endl;
+	dif.addChannel("a", a);
+std::cout << "." << std::endl;
+
+	Field3DOutputFile ofp;
+
+	if(!ofp.create("test_dif.dif")) {
+		std::cout << "Error opening output file" << std::endl;
+		return -1;
+	}
+
+	dif.save(ofp);
 
 	return 0;
 }

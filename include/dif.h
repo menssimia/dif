@@ -35,6 +35,8 @@
 #include <Field3D/Field3DFile.h>
 #include <Field3D/SparseField.h>
 
+#include <map>
+
 FIELD3D_NAMESPACE_OPEN
 
 #define _DIF_TYPE SparseField<T>
@@ -46,6 +48,7 @@ template<typename T> class DifField : public SparseField<T> {
 		DifField(const V2i& size);
 		DifField(const DifField<T>& o);
 		DifField(const _DIF_TYPE& o);
+		~DifField();
 
 		DifField& operator=(const DifField<T>& o);
 
@@ -80,6 +83,10 @@ template<typename T> DifField<T>::DifField(const DifField<T>& o) : _DIF_TYPE(o),
 
 template<typename T> DifField<T>::DifField(const _DIF_TYPE& o) : _DIF_TYPE(o), m_vSize(0) {
 	m_vSize = _DIF_TYPE::dataResolution();
+}
+
+template<typename T> DifField<T>::~DifField() {
+
 }
 
 template<typename T> DifField<T>& DifField<T>::operator=(const DifField<T>& o) {
@@ -151,8 +158,112 @@ template<typename T> const V3i& DifField<T>::getSize() const {
 	_DIF_TYPE::sizeChanged();
 }
 
-#undef _DIF_TYPE
 
+
+template<typename T> class DifImage {
+	public:
+		DifImage(const V2i& size);
+		~DifImage();
+
+		bool addChannel(const std::string& name, const DifField<T>& i, unsigned int& retid);
+		bool addChannel(const std::string& name, unsigned int& retid);
+
+		unsigned int numberOfChannels() const;
+
+		void save(Field3DOutputFile& ofp);
+
+		const std::string& channelName(unsigned int idx) const;
+		
+	private:
+		typedef std::map<std::string, DifField<T> * > ChannelList;
+		typedef typename std::map<std::string, DifField<T> * >::iterator ChannelListIter;
+
+		ChannelList m_lChannels;
+		V3i m_vSize;
+};
+
+template<typename T> DifImage<T>::DifImage(const V2i& size) {
+	m_vSize.x = size.x;
+	m_vSize.y = size.y;
+	m_vSize.z = 1;
+}
+
+template<typename T> DifImage<T>::~DifImage() {
+	ChannelListIter it;
+	
+	for(it = m_lChannels.begin(); it != m_lChannels.end(); it++) {
+		//std::cout << "." << std::endl;
+		//delete (it->second);
+	}
+
+	m_lChannels.clear();
+}
+
+template<typename T> bool DifImage<T>::addChannel(const std::string& name, const DifField<T>& i, unsigned int& retid) {
+	if(i.getSize().x != m_vSize.x || i.getSize().y != m_vSize.y) {
+		return false;
+	}
+
+	if(m_lChannels.find(name) != m_lChannels.end()) {
+		return false;
+	}
+
+	DifField<T> * handle = new DifField<T>(i);
+
+	m_lChannels[name] = handle;
+
+	return true;
+}
+
+template<typename T> bool DifImage<T>::addChannel(const std::string& name, unsigned int& retid) {
+	if(m_lChannels.find(name) != m_lChannels.end()) {
+		return false;
+	}
+
+	DifField<T> * handle = new DifField<T>(V2i(m_vSize.x, m_vSize.y));
+
+	m_lChannels[name] = handle;
+
+	return (numberOfChannels() - 1);
+}
+
+template<typename T> const std::string& DifImage<T>::channelName(unsigned int idx) const {
+	if(idx >= numberOfChannels()) {
+		return std::string();
+	}
+	
+	ChannelListIter it = m_lChannels.begin();
+
+	std::advance(it, idx);
+
+	return it.first;
+}
+
+template<typename T> unsigned int DifImage<T>::numberOfChannels() const {
+	return m_lChannels.size();
+}
+
+template<typename T> void DifImage<T>::save(Field3DOutputFile& ofp) {
+	bool scalar = true;
+
+	ChannelListIter it = m_lChannels.begin();
+
+//	if(field_dynamic_cast< SparseField<T> >(it->second)) {
+//		scalar = true;
+//	}
+
+	for(; it != m_lChannels.end(); it++) {
+		typename DifField<T>::Ptr ptr = (it->second);
+
+		if(scalar) {
+			ofp.writeScalarLayer<T>(std::string(it->first), ptr);
+		} else {
+			//ofp.writeVectorLayer<T>(std::string(it->first), typename DifField<T>::Ptr((it->second)));
+		}
+	}
+}
+
+#undef _DIF_TYPE
 FIELD3D_NAMESPACE_HEADER_CLOSE 
 
 #endif // DIF_H
