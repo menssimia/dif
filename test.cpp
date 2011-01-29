@@ -24,13 +24,13 @@ int fieldtest() {
 	field->attribute = "imagefield";
 
 	std::cout << 0 << std::endl;
-	field->writePixel(V2i(0, 0), 3.05f, 1);
-	field->writePixel(V2i(1, 0), 3.04f, 0);
+	field->writePixel(V2i(0, 0), 1, 3.05f);
+	field->writePixel(V2i(1, 0), 0, 3.04f);
 	std::cout << 1 << std::endl;
 	std::cout << 1 << std::endl;
-	field->writePixel(V2i(6, 2), 3.08f, 1);
+	field->writePixel(V2i(6, 2), 1, 3.08f);
 	std::cout << 0 << std::endl;
-	field->writePixel(V2i(52, 210), 3.04f, 0);
+	field->writePixel(V2i(52, 210), 0, 3.04f);
 
 	ofp.writeScalarLayer<float>(field);
 
@@ -99,7 +99,9 @@ int main(int argc, char *argv[]) {
 
 	dif.readData(V2i(0,0), 0.0f, odata);
 
-	std::cout << odata[0] << std::endl;
+	for(int  i = 0; i < 4; i++) {
+		std::cout << odata[i] << std::endl;
+	}
 
 	//return 0;
 

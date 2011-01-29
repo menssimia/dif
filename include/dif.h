@@ -53,7 +53,7 @@ template<typename T> class DifField : public SparseField<T> {
 
 		DifField& operator=(const DifField<T>& o);
 
-		bool writePixel(const V2i& pos, const T data, unsigned int dpt = 0);
+		bool writePixel(const V2i& pos, unsigned int dpt, const T data);
 		T readPixel(const V2i& pos, unsigned int dpt = 0, bool *retval = NULL);
 
 		int depth() const;
@@ -118,10 +118,12 @@ template<typename T> int DifField<T>::depth() const {
 	return m_vSize.z;
 }
 
-template<typename T> bool DifField<T>::writePixel(const V2i& pos, const T data, unsigned int dpt) {
+template<typename T> bool DifField<T>::writePixel(const V2i& pos, unsigned int dpt, const T data) {
 	if(pos.x >= m_vSize.x || pos.y >= m_vSize.y) {
 		return false;
 	}
+
+	//std::cout << "Write: " << data << " dpt=" << dpt << std::endl;
 
 	if(depth() <= dpt) {
 		m_vSize.z = dpt+1;
@@ -139,7 +141,7 @@ template<typename T> bool DifField<T>::writePixel(const V2i& pos, const T data, 
 
 					// So we don't waste much RAM
 					if(handle != T(0)) {
-						writePixel(V2i(i, j), handle, k);
+						writePixel(V2i(i, j), k, handle);
 					}
 				}
 			}
@@ -331,13 +333,7 @@ template<typename T> bool DifImage<T>::readData(const V2i& pos, float depth, T *
 	ChannelListIter it = m_lChannels.begin();
 
 	for(; it != m_lChannels.end(); it++, i++) {
-		T handle = it->second->readPixel(pos, idx, &status);
-
-		if(!status) {
-			buffer[i] = T(0);
-		} else {
-			buffer[i] = handle;
-		}
+		buffer[i] = it->second->readPixel(pos, idx);
 	}
 
 	return true;
