@@ -27,15 +27,15 @@ int main(int argc, char *argv[]) {
 	field->attribute = "imagefield";
 
 	std::cout << 0 << std::endl;
-	field->writePixel(V2i(1, 0), V3f(23.0f, 12.0f, 54.0f), 0);
+	field->writePixel(V2i(0, 0), 3.05f, 1);
+	field->writePixel(V2i(1, 0), 3.04f, 0);
 	std::cout << 1 << std::endl;
-	field->writePixel(V2i(0, 0), V3f(23.0f, 12.0f, 53.0f), 1);
 	std::cout << 1 << std::endl;
-	field->writePixel(V2i(6, 2), V3f(23.0f, 12.0f, 53.0f), 1);
+	field->writePixel(V2i(6, 2), 3.08f, 1);
 	std::cout << 0 << std::endl;
-	field->writePixel(V2i(52, 210), V3f(23.0f, 12.0f, 11.0f), 0);
+	field->writePixel(V2i(52, 210), 3.04f, 0);
 
-	ofp.writeVectorLayer<float>(field);
+	ofp.writeScalarLayer<float>(field);
 
 	ofp.close();
 
@@ -48,14 +48,14 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-	Field< FIELD3D_VEC3_T<float> >::Vec rfields = ifp.readVectorLayers<float>();
+	Field<float>::Vec rfields = ifp.readScalarLayers<float>();
 
 	if(rfields.size() < 1) {
 		std::cout << "OMG What just happend?!??!?!" << std::endl;
 		return -1;
 	}
 
-	SparseField< FIELD3D_VEC3_T<float> >::Ptr rspfield = field_dynamic_cast< SparseField< FIELD3D_VEC3_T<float> > >(rfields[0]);
+	SparseField<float>::Ptr rspfield = field_dynamic_cast< SparseField<float> >(rfields[0]);
 
 	if(!rspfield) {
 		std::cout << "Not a sparse field" << std::endl;
