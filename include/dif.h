@@ -36,6 +36,7 @@
 #include <Field3D/SparseField.h>
 
 #include <map>
+#include <vector>
 
 FIELD3D_NAMESPACE_OPEN
 
@@ -173,6 +174,11 @@ template<typename T> class DifImage {
 		void save(Field3DOutputFile& ofp);
 
 		const std::string& channelName(unsigned int idx) const;
+
+		float depthAtIndex(unsigned int idx, bool* retval = 0) const;
+		unsigned int indexAtDepth(float dpt, bool* retval = 0) const;
+
+		unsigned int depthLevels() const;
 		
 	private:
 		typedef std::map<std::string, DifField<T> * > ChannelList;
@@ -180,7 +186,10 @@ template<typename T> class DifImage {
 
 		ChannelList m_lChannels;
 	
-		SparseField<float> m_vrDepthMapping;
+		typedef std::vector<float> DepthMappingList;
+		typedef typename std::vector<float>::iterator DepthMappingListIter;
+
+		DepthMappingList m_lDepthMapping;
 
 		V3i m_vSize;
 };
@@ -245,6 +254,45 @@ template<typename T> unsigned int DifImage<T>::numberOfChannels() const {
 	return m_lChannels.size();
 }
 
+template<typename T> float DifImage<T>::depthAtIndex(unsigned int idx, bool* retval) const {
+	if(idx >= m_lDepthMapping.size()) {
+		if(retval) {
+			(*retval) = false;
+		}
+
+		return 0.0f;
+	}
+
+	if(retval) {
+		(*retval) = true;
+	}
+
+	return m_lDepthMapping.at(idx);
+}
+
+template<typename T> unsigned int DifImage<T>::indexAtDepth(float dpt, bool* retval) const {
+
+	for(unsigned int i = 0; i < m_lDepthMapping.size(); i++) {
+		if(m_lDepthMapping.at(i) == dpt) {
+			if(retval) {
+				(*retval) = true;
+			}
+
+			return i;
+		}
+	}
+
+	if(retval) {
+		(*retval) = false;
+	}
+
+	return 0;
+}
+
+template<typename T> unsigned int DifImage<T>::depthLevels() const {
+	return m_lDepthMapping.size();
+}
+
 template<typename T> void DifImage<T>::save(Field3DOutputFile& ofp) {
 //	bool scalar = true;
 
@@ -253,6 +301,20 @@ template<typename T> void DifImage<T>::save(Field3DOutputFile& ofp) {
 //	if(field_dynamic_cast< SparseField<T> >(it->second)) {
 //		scalar = true;
 //	}
+
+
+	{
+		SparseField<float> dptmapping;
+		dptmapping.setSize(V3i(1, 1, m_lDepthMapping.size()));
+
+		DepthMappingListIter dit;
+		unsigned int i = 0;
+
+		for(dit = m_lDepthMapping.begin(); dit != m_lDepthMapping.end(); it++) {
+			dptmapping.lvalue(0, 0, i) = (*dit);
+			++i;
+		}
+	}
 
 	for(; it != m_lChannels.end(); it++) {
 		typename DifField<T>::Ptr ptr = (it->second);
