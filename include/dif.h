@@ -179,6 +179,9 @@ template<typename T> class DifImage {
 		typedef typename std::map<std::string, DifField<T> * >::iterator ChannelListIter;
 
 		ChannelList m_lChannels;
+	
+		SparseField<float> m_vrDepthMapping;
+
 		V3i m_vSize;
 };
 
@@ -192,8 +195,7 @@ template<typename T> DifImage<T>::~DifImage() {
 	ChannelListIter it;
 	
 	for(it = m_lChannels.begin(); it != m_lChannels.end(); it++) {
-		//std::cout << "." << std::endl;
-		//delete (it->second);
+		// FIXME delete channels
 	}
 
 	m_lChannels.clear();
@@ -228,7 +230,7 @@ template<typename T> bool DifImage<T>::addChannel(const std::string& name, unsig
 }
 
 template<typename T> const std::string& DifImage<T>::channelName(unsigned int idx) const {
-	if(idx >= numberOfChannels()) {
+	if(idx >= numberOfChannels() || m_lChannels.size() < 1) {
 		return std::string();
 	}
 	
@@ -244,7 +246,7 @@ template<typename T> unsigned int DifImage<T>::numberOfChannels() const {
 }
 
 template<typename T> void DifImage<T>::save(Field3DOutputFile& ofp) {
-	bool scalar = true;
+//	bool scalar = true;
 
 	ChannelListIter it = m_lChannels.begin();
 
@@ -255,11 +257,7 @@ template<typename T> void DifImage<T>::save(Field3DOutputFile& ofp) {
 	for(; it != m_lChannels.end(); it++) {
 		typename DifField<T>::Ptr ptr = (it->second);
 
-		if(scalar) {
-			ofp.writeScalarLayer<T>(std::string(it->first), ptr);
-		} else {
-			//ofp.writeVectorLayer<T>(std::string(it->first), typename DifField<T>::Ptr((it->second)));
-		}
+		ofp.writeScalarLayer<T>(std::string(it->first), ptr);	
 	}
 }
 
