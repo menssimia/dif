@@ -43,7 +43,7 @@ template<typename T> class DifField : public SparseField< FIELD3D_VEC3_T<T> > {
 	public:
 		typedef boost::intrusive_ptr<DifField> Ptr;
 
-		DifField(const V2i& size, unsigned int initialdepth=0);
+		DifField(const V2i& size);
 		DifField(const DifField<T>& o);
 		DifField(const _DIF_TYPE& o);
 
@@ -60,18 +60,14 @@ template<typename T> class DifField : public SparseField< FIELD3D_VEC3_T<T> > {
 		virtual void sizeChanged();
 
 	private:
-		V3i m_vSize; // So we dont need recopmputation through dataResolution()
+		V3i   m_vSize; // So we dont need recopmputation through dataResolution()
 };
 
-template<typename T> DifField<T>::DifField(const V2i& size, unsigned int initialdepth) : _DIF_TYPE() {
+template<typename T> DifField<T>::DifField(const V2i& size) : _DIF_TYPE() {
 	m_vSize.x = size.x;
 	m_vSize.y = size.y;
 
-	if(initialdepth < 1) {
-		m_vSize.z = 1;
-	} else {
-		m_vSize.z = initialdepth;
-	}
+	m_vSize.z = 1;
 
 	_DIF_TYPE::setSize(m_vSize);
 	_DIF_TYPE::clear( FIELD3D_VEC3_T<T>(0) );
@@ -94,7 +90,7 @@ template<typename T> DifField<T>& DifField<T>::operator=(const DifField<T>& o) {
 }
 
 template<typename T> FIELD3D_VEC3_T<T> DifField<T>::readPixel(const V2i& pos, unsigned int dpt, bool *retval) {
-	if(m_vSize.x < (pos.x - 1) || m_vSize.y < (pos.y - 1) || m_vSize.z < dpt) {
+	if(m_vSize.x <= pos.x || m_vSize.y <= pos.y || m_vSize.z <= dpt) {
 		if(retval != NULL) {
 			(*retval) = false;
 		}
@@ -130,7 +126,12 @@ template<typename T> bool DifField<T>::writePixel(const V2i& pos, const FIELD3D_
 		for(int i = 0; i < dims.x; i++) {
 			for(int j = 0; j < dims.y; j++) {
 				for(int k = 0; k < dims.z; k++) {
-					writePixel(V2i(i, j), tmp.value(i, j, k), k);
+					FIELD3D_VEC3_T<T> handle = tmp.value(i, j, k);
+
+					// So we don't waste much RAM
+					if(handle.x != 0.0f || handle.y != 0.0f || handle.z != 0.0f) {
+						writePixel(V2i(i, j), handle, k);
+					}
 				}
 			}
 		}
@@ -138,6 +139,7 @@ template<typename T> bool DifField<T>::writePixel(const V2i& pos, const FIELD3D_
 
 	_DIF_TYPE::lvalue(pos.x, pos.y, dpt) = data;
 }
+
 template<typename T> const V3i& DifField<T>::getSize() const {
 	return m_vSize;
 }

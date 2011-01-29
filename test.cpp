@@ -19,20 +19,25 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-	V2i size(512, 512);
+	V2i size(4096, 1714);
 
 	DifField<float>::Ptr field = new DifField<float>(size);
 
 	field->name = "somefield";
 	field->attribute = "imagefield";
 
+	std::cout << 0 << std::endl;
 	field->writePixel(V2i(1, 0), V3f(23.0f, 12.0f, 54.0f), 0);
+	std::cout << 1 << std::endl;
 	field->writePixel(V2i(0, 0), V3f(23.0f, 12.0f, 53.0f), 1);
+	std::cout << 1 << std::endl;
+	field->writePixel(V2i(6, 2), V3f(23.0f, 12.0f, 53.0f), 1);
+	std::cout << 0 << std::endl;
+	field->writePixel(V2i(52, 210), V3f(23.0f, 12.0f, 11.0f), 0);
 
 	ofp.writeVectorLayer<float>(field);
 
 	ofp.close();
-
 
 	// Read the File
 
