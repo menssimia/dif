@@ -167,6 +167,8 @@ template<typename T> const V3i& DifField<T>::getSize() const {
 
 template<typename T> class DifImage {
 	public:
+		typedef boost::intrusive_ptr<DifImage> Ptr;
+
 		DifImage(const V2i& size);
 		~DifImage();
 
@@ -188,6 +190,13 @@ template<typename T> class DifImage {
 		// data must be at least sizeof(T)*numberOfChannels()
 		void writeData(const V2i& pos, float depth, T* data);
 		bool readData(const V2i& pos, float depth, T *buffer);
+
+		enum DifImageGetType {
+			eBefore,
+			eAfter
+		};
+
+		void getNearestDepthIndex(float dpt, enum DifImageGetType type, unsigned int& retid);
 
 	protected:
 		void loadDepthMapping(const SparseField<float>::Ptr field);
@@ -505,6 +514,35 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 	}
 
 	return true;
+}
+
+template<typename T> void DifImage<T>::getNearestDepthIndex(float dpt, DifImage<T>::DifImageGetType type, unsigned int& retid) {
+	DepthMappingListIter it;
+
+	float current = 0.0f;
+	unsigned int lidx = 0;
+	unsigned int i    = 0;
+
+	for(it = m_lDepthMapping.begin(); it != m_lDepthMapping.end(); it++, i++) {
+		if((*it) == dpt) {
+			retid = i;
+			return;
+		}
+
+		if(type == eBefore) {
+			if((*it) > current && (*it) < dpt) {
+				lidx = i;
+				current = *it;
+			}
+		} else {
+			if((*it) < current && (*it) > dpt) {
+				lidx = i;
+				current = *it;
+			}
+		}
+	}
+
+	retid = lidx;
 }
 
 #undef _DIF_TYPE
