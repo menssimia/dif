@@ -114,5 +114,31 @@ int main(int argc, char *argv[]) {
 
 	dif.save(ofp);
 
+
+	Field3DInputFile ifp;
+
+	if(!ifp.open("test_dif.dif")) {
+		std::cout << "Error opening input file" << std::endl;
+		return -1;
+	}
+
+	DifImage<float> difi(V2i(0,0));
+	if(!difi.load(ifp)) {
+		std::cout << "Error loading deep image file" << std::endl;
+		return -1;		
+	}
+
+	std::cout << "depth Levels: " << difi.depthLevels() << std::endl;
+	std::cout << "number of channels: " << difi.numberOfChannels() << std::endl;
+
+	float testdata[4];
+
+	dif.readData(V2i(0,0), 23.1f, testdata);
+	for(int  i = 0; i < 4; i++) {
+		std::cout << odata[i] << " ";
+	}
+
+	std::cout << std::endl;
+
 	return 0;
 }

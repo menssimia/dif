@@ -174,6 +174,7 @@ template<typename T> class DifImage {
 		unsigned int numberOfChannels() const;
 
 		void save(Field3DOutputFile& ofp);
+		bool load(Field3DInputFile& ifp);
 
 		const std::string& channelName(unsigned int idx) const;
 
@@ -185,6 +186,9 @@ template<typename T> class DifImage {
 		// data must be at least sizeof(T)*numberOfChannels()
 		void writeData(const V2i& pos, float depth, T* data);
 		bool readData(const V2i& pos, float depth, T *buffer);
+
+	protected:
+		void loadDepthMapping(const SparseField<float>::Ptr field);
 		
 	private:
 		typedef std::map<std::string, DifField<T> * > ChannelList;
@@ -193,7 +197,7 @@ template<typename T> class DifImage {
 		ChannelList m_lChannels;
 	
 		typedef std::vector<float> DepthMappingList;
-		typedef typename std::vector<float>::iterator DepthMappingListIter;
+		typedef std::vector<float>::iterator DepthMappingListIter;
 
 		DepthMappingList m_lDepthMapping;
 
@@ -350,18 +354,21 @@ template<typename T> void DifImage<T>::save(Field3DOutputFile& ofp) {
 
 
 	{
-		SparseField<float> dptmapping;
-		dptmapping.setSize(V3i(1, 1, m_lDepthMapping.size()));
+		SparseField<float>::Ptr dptmapping = new SparseField<float>();
+		dptmapping->setSize(V3i(1, 1, m_lDepthMapping.size()));
 
 		DepthMappingListIter dit;
 		unsigned int i = 0;
 
 		for(dit = m_lDepthMapping.begin(); dit != m_lDepthMapping.end(); dit++) {
-			dptmapping.lvalue(0, 0, i) = (*dit);
+			dptmapping->lvalue(0, 0, i) = (*dit);
 			++i;
 
 			//std::cout << "[" << i << "] = " << (float)*dit << std::endl;
 		}
+
+		ofp.writeScalarLayer<float>("depthMapping", dptmapping);
+
 	}
 
 	for(; it != m_lChannels.end(); it++) {
@@ -369,6 +376,88 @@ template<typename T> void DifImage<T>::save(Field3DOutputFile& ofp) {
 
 		ofp.writeScalarLayer<T>(std::string(it->first), ptr);	
 	}
+}
+
+template<typename T> void DifImage<T>::loadDepthMapping(const SparseField<float>::Ptr field) {
+	V3i dptDim = field->dataResolution();
+
+	for(int i = 0; i < dptDim.z; i++) {
+		m_lDepthMapping.push_back(field->fastValue(0, 0, i));
+	}
+}
+
+template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
+	typedef typename Field< T >::Vec           FieldVector;
+	typedef typename Field< T >::Vec::iterator FieldVectorIterator;
+	typedef typename SparseField< T >::Ptr     SparseFieldPtr;
+
+	// giving a layerName does not work for some reason so we look manually for our structure
+	Field<float>::Vec dptMappings = ifp.readScalarLayers<float>();
+
+	if(dptMappings.size() < 1) {
+		return false;
+	}
+
+	{
+		Field<float>::Vec::iterator it;
+
+		for(it = dptMappings.begin(); it != dptMappings.end();  it++) {
+			if((*it)->name == "depthMapping") {
+				SparseField<float>::Ptr depthField = field_dynamic_cast< SparseField<float> >(dptMappings[0]);
+
+				if(!depthField) {
+					return false;
+				}
+
+				loadDepthMapping(depthField);
+
+				break;
+			}
+		}
+	}
+
+	
+
+	FieldVector fields = ifp.readScalarLayers<T>();
+
+	if(fields.size() < 1) {
+		return false;
+	}
+
+	{
+		FieldVectorIterator it;
+		V3i initialSize;
+		bool sizeSet = false;
+
+		for(it = fields.begin(); it != fields.end();  it++) {
+			if((*it)->name == "depthMapping" || (*it)->name.length() == 0) {
+				continue;
+			}
+
+			SparseFieldPtr handle = field_dynamic_cast< SparseField<T> >(*it);
+
+			if(!handle) {
+				continue;
+			}
+
+			if(!sizeSet) {
+				m_vSize = handle->dataResolution();
+				sizeSet = true;
+			}
+
+			// check for size mismatch
+			if(m_vSize != handle->dataResolution()) {
+				continue;
+			}
+
+			unsigned int retid = 0;
+
+			addChannel((*it)->name, DifField<T>(*handle), retid);
+		}
+	
+	}
+
+	return true;
 }
 
 #undef _DIF_TYPE
