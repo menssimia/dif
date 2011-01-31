@@ -29,11 +29,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
 */
 
+
 #ifndef DIF_H
 #define DIF_H
 
 #include <Field3D/Field3DFile.h>
 #include <Field3D/SparseField.h>
+#include <Field3D/FieldInterp.h>
 
 #include <map>
 #include <vector>
@@ -204,22 +206,32 @@ template<typename T> class DifImage {
 		V3i m_vSize;
 };
 
+/*!
+ * @brief Assignment constructor
+ *
+ * @param[in] size The Initial size. Note that the size cannot be altered after
+ *                 this point except for if you're loading a Dif file through
+ *                 DifImage::load()
+ */
 template<typename T> DifImage<T>::DifImage(const V2i& size) {
 	m_vSize.x = size.x;
 	m_vSize.y = size.y;
 	m_vSize.z = 1;
 }
 
+/// Default destructor
 template<typename T> DifImage<T>::~DifImage() {
-	ChannelListIter it;
-	
-	for(it = m_lChannels.begin(); it != m_lChannels.end(); it++) {
-		// FIXME delete channels
-	}
-
 	m_lChannels.clear();
 }
 
+/*!
+ * @brief Adds a channel by using an existing DifField
+ * @param[in] name    Name of the channel
+ * @param[in] i       A DifField to copy values from
+ * @param[out] retid  Identification number of the channel
+ * @retval true  Success
+ * @retval false Size mismatch or channel with the same name already existing  
+ */
 template<typename T> bool DifImage<T>::addChannel(const std::string& name, const DifField<T>& i, unsigned int& retid) {
 	if(i.getSize().x != m_vSize.x || i.getSize().y != m_vSize.y) {
 		return false;
@@ -236,6 +248,13 @@ template<typename T> bool DifImage<T>::addChannel(const std::string& name, const
 	return true;
 }
 
+/*!
+ * @brief Adds a channel
+ * @param[in] name Name of the channel
+ * @param[out] retid Identification number of the channel
+ * @retval true Success
+ * @retval false Channel with the same name existing
+ */
 template<typename T> bool DifImage<T>::addChannel(const std::string& name, unsigned int& retid) {
 	if(m_lChannels.find(name) != m_lChannels.end()) {
 		return false;
@@ -248,6 +267,11 @@ template<typename T> bool DifImage<T>::addChannel(const std::string& name, unsig
 	return (numberOfChannels() - 1);
 }
 
+/*!
+ * @brief Returns the name of the channel at index @a idx
+ * @param[in]  The Index (0..numberOfChannels()-1)
+ * @return A String (empty if @a idx is out of range)
+ */
 template<typename T> const std::string& DifImage<T>::channelName(unsigned int idx) const {
 	if(idx >= numberOfChannels() || m_lChannels.size() < 1) {
 		return std::string();
@@ -260,10 +284,17 @@ template<typename T> const std::string& DifImage<T>::channelName(unsigned int id
 	return it.first;
 }
 
+/// Returns the number of channels.
 template<typename T> unsigned int DifImage<T>::numberOfChannels() const {
 	return m_lChannels.size();
 }
 
+/*!
+ * @brief Returns the associated depth value to a depth index
+ * @param[in]  idx The Index (range 0..depthLevels()-1)
+ * @param[out] retval (Optimal) Pointer to a bool for the return code
+ * @return A float
+ */
 template<typename T> float DifImage<T>::depthAtIndex(unsigned int idx, bool* retval) const {
 	if(idx >= m_lDepthMapping.size()) {
 		if(retval) {
@@ -280,6 +311,12 @@ template<typename T> float DifImage<T>::depthAtIndex(unsigned int idx, bool* ret
 	return m_lDepthMapping.at(idx);
 }
 
+/*!
+ * @brief Returns the index of the given depth
+ * @param[in]  dpt The depth
+ * @param[out] retval (Optimal) Pointer to a bool for the return code
+ * @return An unsigned integer in range 0..depthLevels()-1 also 0 on error 
+ */
 template<typename T> unsigned int DifImage<T>::indexAtDepth(float dpt, bool* retval) const {
 
 	for(unsigned int i = 0; i < m_lDepthMapping.size(); i++) {
@@ -299,10 +336,20 @@ template<typename T> unsigned int DifImage<T>::indexAtDepth(float dpt, bool* ret
 	return 0;
 }
 
+/// Returns the number of depth levels
 template<typename T> unsigned int DifImage<T>::depthLevels() const {
 	return m_lDepthMapping.size();
 }
 
+/*!
+ * @brief Write Data to the image
+ *
+ * This function has no return value and will simply ignore the data if the given
+ * Position @a pos is invalid. 
+ * @param[in] pos The Position
+ * @param[in] depth The depth level
+ * @param[in] data The Data (must be at least sizeof(T)* numberOfChannels())
+ */
 template<typename T> void DifImage<T>::writeData(const V2i& pos, float depth, T* data) {
 	unsigned int i   = 0;
 	unsigned int idx = 0;
