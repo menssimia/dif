@@ -93,6 +93,9 @@ int main(int argc, char *argv[]) {
 	float data[4] = {2.0f, 1.0f, 3.0f, 4.0f};
 
 	dif.writeData(V2i(0,0), 0.0f, data);
+
+	data[2] = 12.1;
+
 	dif.writeData(V2i(0,0), 23.1f, data);
 
 	float odata[4];
@@ -133,9 +136,12 @@ int main(int argc, char *argv[]) {
 
 	float testdata[4];
 
-	dif.readData(V2i(0,0), 23.1f, testdata);
+//	difi.writeData(V2i(0,0), 0.0f, data);
+//	difi.writeData(V2i(0,0), 23.1f, data);
+
+	difi.readData(V2i(0,0), 23.f, testdata, DifImage<float>::eLinear);
 	for(int  i = 0; i < 4; i++) {
-		std::cout << odata[i] << " ";
+		std::cout << testdata[i] << " ";
 	}
 
 	std::cout << std::endl;

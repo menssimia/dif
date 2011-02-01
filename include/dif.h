@@ -187,9 +187,14 @@ template<typename T> class DifImage {
 
 		unsigned int depthLevels() const;
 
+		enum DifImageInterpolation {
+			eNone,
+			eLinear,
+		};
+
 		// data must be at least sizeof(T)*numberOfChannels()
 		void writeData(const V2i& pos, float depth, T* data);
-		bool readData(const V2i& pos, float depth, T *buffer);
+		bool readData(const V2i& pos, float depth, T *buffer, enum DifImageInterpolation type = eNone);
 
 		enum DifImageGetType {
 			eBefore,
@@ -239,7 +244,7 @@ template<typename T> DifImage<T>::~DifImage() {
  * @param[in] i       A DifField to copy values from
  * @param[out] retid  Identification number of the channel
  * @retval true  Success
- * @retval false Size mismatch or channel with the same name already existing  
+ * @retval false Size mismatch or channel of the same name already existing  
  */
 template<typename T> bool DifImage<T>::addChannel(const std::string& name, const DifField<T>& i, unsigned int& retid) {
 	if(i.getSize().x != m_vSize.x || i.getSize().y != m_vSize.y) {
@@ -262,7 +267,7 @@ template<typename T> bool DifImage<T>::addChannel(const std::string& name, const
  * @param[in] name Name of the channel
  * @param[out] retid Identification number of the channel
  * @retval true Success
- * @retval false Channel with the same name existing
+ * @retval false Channel of the same name existing
  */
 template<typename T> bool DifImage<T>::addChannel(const std::string& name, unsigned int& retid) {
 	if(m_lChannels.find(name) != m_lChannels.end()) {
@@ -378,22 +383,50 @@ template<typename T> void DifImage<T>::writeData(const V2i& pos, float depth, T*
 	}
 }
 
-template<typename T> bool DifImage<T>::readData(const V2i& pos, float depth, T *buffer) {
-	unsigned int idx = 0;
-	unsigned int i   = 0;
-	bool status = false;
+template<typename T> bool DifImage<T>::readData(const V2i& pos, float depth, T *buffer, enum DifImage<T>::DifImageInterpolation type) {
+	unsigned int i = 0;
 
-	idx = indexAtDepth(depth, &status);
+	if(type == eNone) {
+		unsigned int idx = 0;
+		bool status = false;
 
-	// Must have at least one channel at the given depth
-	if(!status) {
-		return false;
+		idx = indexAtDepth(depth, &status);
+
+		// Must have at least one channel at the given depth
+		if(!status) {
+			return false;
+		}
+
+		ChannelListIter it = m_lChannels.begin();
+	
+		for(; it != m_lChannels.end(); it++, i++) {
+			buffer[i] = it->second->readPixel(pos, idx);
+		}
 	}
+	else if(type == eLinear) {
+		unsigned int bfr, aftr;
 
-	ChannelListIter it = m_lChannels.begin();
+		getNearestDepthIndex(depth, eBefore, bfr);
+		getNearestDepthIndex(depth, eAfter,  aftr);
 
-	for(; it != m_lChannels.end(); it++, i++) {
-		buffer[i] = it->second->readPixel(pos, idx);
+		if(bfr == aftr) {
+			return readData(pos, depth, buffer, eNone);
+		}
+
+		T *a = new T[numberOfChannels()];
+		T *b = new T[numberOfChannels()];
+
+		ChannelListIter it = m_lChannels.begin();
+
+		for(; it != m_lChannels.end(); it++, i++) {
+			a[i] = it->second->readPixel(pos, bfr);
+			b[i] = it->second->readPixel(pos, aftr);
+		}
+
+		// TODO
+
+		delete[] a;
+		delete[] b;
 	}
 
 	return true;
@@ -522,6 +555,7 @@ template<typename T> void DifImage<T>::getNearestDepthIndex(float dpt, DifImage<
 	float current = 0.0f;
 	unsigned int lidx = 0;
 	unsigned int i    = 0;
+	bool aset = false;
 
 	for(it = m_lDepthMapping.begin(); it != m_lDepthMapping.end(); it++, i++) {
 		if((*it) == dpt) {
@@ -530,14 +564,20 @@ template<typename T> void DifImage<T>::getNearestDepthIndex(float dpt, DifImage<
 		}
 
 		if(type == eBefore) {
-			if((*it) > current && (*it) < dpt) {
+			if((*it) < dpt && (*it) > current) {
 				lidx = i;
 				current = *it;
 			}
 		} else {
-			if((*it) < current && (*it) > dpt) {
-				lidx = i;
-				current = *it;
+			if((*it) > dpt) {
+				if(!aset) {
+					current = *it;
+					lidx = i;
+					aset = true;
+				} else if ((*it) < current) {
+					lidx = i;
+					current = *it;
+				}
 			}
 		}
 	}
