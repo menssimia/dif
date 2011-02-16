@@ -486,6 +486,7 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 
 	// giving a layerName does not work for some reason so we look manually for our structure
 	Field<float>::Vec dptMappings = ifp.readScalarLayers<float>();
+	bool depthLoaded = false;
 
 	if(dptMappings.size() < 1) {
 		return false;
@@ -503,10 +504,16 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 				}
 
 				loadDepthMapping(depthField);
+				depthLoaded = true;
 
 				break;
 			}
 		}
+	}
+
+	// No depth mapping available
+	if(!depthLoaded) {
+		return false;
 	}
 
 	
