@@ -247,7 +247,7 @@ template<typename T> DifImage<T>::~DifImage() {
  * @retval false Size mismatch or channel of the same name already existing  
  */
 template<typename T> bool DifImage<T>::addChannel(const std::string& name, const DifField<T>& i, unsigned int& retid) {
-	if(i.getSize().x != m_vSize.x || i.getSize().y != m_vSize.y) {
+	if(i.getSize() != m_vSize) {
 		return false;
 	}
 
@@ -552,10 +552,10 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 template<typename T> void DifImage<T>::getNearestDepthIndex(float dpt, DifImage<T>::DifImageGetType type, unsigned int& retid) {
 	DepthMappingListIter it;
 
-	float current = 0.0f;
+	float current     = 0.0f;
 	unsigned int lidx = 0;
 	unsigned int i    = 0;
-	bool aset = false;
+	bool aset         = false;
 
 	for(it = m_lDepthMapping.begin(); it != m_lDepthMapping.end(); it++, i++) {
 		if((*it) == dpt) {
