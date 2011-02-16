@@ -218,7 +218,11 @@ template<typename T> class DifImage {
 		DepthMappingList m_lDepthMapping;
 
 		V3i m_vSize;
+
+		static const char *m_scDepthMappingName;
 };
+
+template<typename T> const char * DifImage<T>::m_scDepthMappingName = "depthMapping";
 
 /*!
  * @brief Assignment constructor
@@ -456,7 +460,7 @@ template<typename T> void DifImage<T>::save(Field3DOutputFile& ofp) {
 			//std::cout << "[" << i << "] = " << (float)*dit << std::endl;
 		}
 
-		ofp.writeScalarLayer<float>("depthMapping", dptmapping);
+		ofp.writeScalarLayer<float>(m_scDepthMappingName, dptmapping);
 
 	}
 
@@ -491,7 +495,7 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 		Field<float>::Vec::iterator it;
 
 		for(it = dptMappings.begin(); it != dptMappings.end();  it++) {
-			if((*it)->name == "depthMapping") {
+			if((*it)->name == m_scDepthMappingName) {
 				SparseField<float>::Ptr depthField = field_dynamic_cast< SparseField<float> >(dptMappings[0]);
 
 				if(!depthField) {
@@ -519,7 +523,7 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 		bool sizeSet = false;
 
 		for(it = fields.begin(); it != fields.end();  it++) {
-			if((*it)->name == "depthMapping" || (*it)->name.length() == 0) {
+			if((*it)->name == m_scDepthMappingName || (*it)->name.length() == 0) {
 				continue;
 			}
 
