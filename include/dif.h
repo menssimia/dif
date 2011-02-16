@@ -427,7 +427,21 @@ template<typename T> bool DifImage<T>::readData(const V2i& pos, float depth, T *
 			b[i] = it->second->readPixel(pos, aftr);
 		}
 
-		// TODO
+		{
+			float d_bfr  = depthAtIndex(bfr);
+			float d_aftr = depthAtIndex(aftr);
+
+			float dt = d_aftr - d_bfr;
+			float t  = (depth - d_bfr) / dt;
+
+//			std::cout << "DepthBefore: " << d_bfr << std::endl
+//					  << "DepthAfter: " << d_aftr << std::endl
+//					  << "dt: " << dt << " t: " << t << std::endl;
+
+			for(unsigned long i = 0; i < numberOfChannels(); i++) {
+				buffer[i] = Imath::lerp(a[i], b[i], t);
+			}
+		}
 
 		delete[] a;
 		delete[] b;

@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
 //	difi.writeData(V2i(0,0), 0.0f, data);
 //	difi.writeData(V2i(0,0), 23.1f, data);
 
-	difi.readData(V2i(0,0), 23.f, testdata, DifImage<float>::eLinear);
+	difi.readData(V2i(0,0), 23.0f, testdata, DifImage<float>::eLinear);
 	for(int  i = 0; i < 4; i++) {
 		std::cout << testdata[i] << " ";
 	}
