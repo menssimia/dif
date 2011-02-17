@@ -194,7 +194,7 @@ template<typename T> class DifImage {
 
 		// data must be at least sizeof(T)*numberOfChannels()
 		void writeData(const V2i& pos, float depth, T* data);
-		bool readData(const V2i& pos, float depth, T *buffer, enum DifImageInterpolation type = eNone);
+		bool readData(const V2i& pos, float depth, T *buffer, enum DifImageInterpolation type = eLinear);
 
 		enum DifImageGetType {
 			eBefore,
@@ -202,6 +202,7 @@ template<typename T> class DifImage {
 		};
 
 		void getNearestDepthIndex(float dpt, enum DifImageGetType type, unsigned int& retid);
+
 
 	protected:
 		void loadDepthMapping(const SparseField<float>::Ptr field);
