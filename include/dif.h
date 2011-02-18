@@ -577,7 +577,7 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 	
 	}
 
-	return true;
+	return (m_lChannels.size() > 0) ? true : false;
 }
 
 template<typename T> void DifImage<T>::getNearestDepthIndex(float dpt, DifImage<T>::DifImageGetType type, unsigned int& retid) {
