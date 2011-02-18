@@ -188,8 +188,8 @@ template<typename T> class DifImage {
 		unsigned int depthLevels() const;
 
 		enum DifImageInterpolation {
-			eNone,
-			eLinear,
+			eNone   = 0,
+			eLinear = 1,
 		};
 
 		// data must be at least sizeof(T)*numberOfChannels()
@@ -202,7 +202,6 @@ template<typename T> class DifImage {
 		};
 
 		void getNearestDepthIndex(float dpt, enum DifImageGetType type, unsigned int& retid);
-
 
 	protected:
 		void loadDepthMapping(const SparseField<float>::Ptr field);
