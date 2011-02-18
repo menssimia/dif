@@ -188,8 +188,8 @@ template<typename T> class DifImage {
 		unsigned int depthLevels() const;
 
 		enum DifImageInterpolation {
-			eNone   = 0,
-			eLinear = 1,
+			eNone     = 0,
+			eLinear   = 1,
 		};
 
 		// data must be at least sizeof(T)*numberOfChannels()
@@ -416,11 +416,12 @@ template<typename T> bool DifImage<T>::readData(const V2i& pos, float depth, T *
 		unsigned int bfr, aftr;
 
 		getNearestDepthIndex(depth, eBefore, bfr);
-		getNearestDepthIndex(depth, eAfter,  aftr);
 
-		if(bfr == aftr) {
+		if(depthAtIndex(bfr) >= depth || (bfr == aftr) || (bfr + 1) >=  depthLevels()) {
 			return readData(pos, depth, buffer, eNone);
 		}
+
+		aftr = (bfr + 1);
 
 		T *a = new T[numberOfChannels()];
 		T *b = new T[numberOfChannels()];
