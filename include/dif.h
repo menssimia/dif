@@ -391,6 +391,11 @@ template<typename T> void DifImage<T>::writeData(const V2i& pos, float depth, T*
 template<typename T> bool DifImage<T>::readData(const V2i& pos, float depth, T *buffer, enum DifImage<T>::DifImageInterpolation type) {
 	unsigned int i = 0;
 
+	// No channels available
+	if(m_lChannels.size() == 0) {
+		return false;
+	}
+
 	if(type == eNone) {
 		unsigned int idx = 0;
 		bool status = false;
