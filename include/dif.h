@@ -27,7 +27,7 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 
 #ifndef DIF_H
@@ -387,6 +387,16 @@ template<typename T> void DifImage<T>::writeData(const V2i& pos, float depth, T*
 	}
 }
 
+/*!
+ * @brief Reads Data from the Image
+ * @param[in] pos    Position
+ * @param[in] depth  Desired depth
+ * @param[in] buffer Buffer to write data to
+ * @param[in] type   Interpolation type
+ *
+ * If no data is available at the given @a depth it will be interpolated by the nearest two 
+ * depths available if @a type is eLinear or will return false otherwise.
+ */
 template<typename T> bool DifImage<T>::readData(const V2i& pos, float depth, T *buffer, enum DifImage<T>::DifImageInterpolation type) {
 	unsigned int i = 0;
 
@@ -456,6 +466,9 @@ template<typename T> bool DifImage<T>::readData(const V2i& pos, float depth, T *
 	return true;
 }
 
+/*!
+ * Saves the Deep image to the given output file.
+ */
 template<typename T> void DifImage<T>::save(Field3DOutputFile& ofp) {
 //	bool scalar = true;
 
@@ -499,6 +512,7 @@ template<typename T> void DifImage<T>::loadDepthMapping(const SparseField<float>
 	}
 }
 
+/// Loads the image from a input file.
 template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 	typedef typename Field< T >::Vec           FieldVector;
 	typedef typename Field< T >::Vec::iterator FieldVectorIterator;
@@ -580,6 +594,13 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 	return (m_lChannels.size() > 0) ? true : false;
 }
 
+/*!
+ * @brief Computes the nearest depth
+ *
+ * @param[in] dpt    The Depth
+ * @param[in] type   Type
+ * @param[out] retid Return Depth ID
+ */
 template<typename T> void DifImage<T>::getNearestDepthIndex(float dpt, DifImage<T>::DifImageGetType type, unsigned int& retid) {
 	DepthMappingListIter it;
 
