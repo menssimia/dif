@@ -275,7 +275,9 @@ template<typename T> bool DifImage<T>::addChannel(const std::string& name, const
 
 	m_lChannels[name] = handle;
 
-	retid = m_ulChannelIndex++;
+	retid = m_ulChannelIndex;
+
+	++m_ulChannelIndex;
 
 	return true;
 }
@@ -298,7 +300,9 @@ template<typename T> bool DifImage<T>::addChannel(const std::string& name, unsig
 
 	m_lChannels[name] = handle;
 
-	retid = m_ulChannelIndex++;
+	retid = m_ulChannelIndex;
+
+	++m_ulChannelIndex;
 
 	return (numberOfChannels() - 1);
 }
@@ -326,15 +330,14 @@ template<typename T> unsigned int DifImage<T>::channelIndex(const std::string& n
 	}
 
 	ChannelListIter it;
-	long index = 0;
 
-	for(it = m_lChannels.begin(); it != m_lChannels.end(); it++, index++) {
+	for(it = m_lChannels.begin(); it != m_lChannels.end(); it++) {
 		if((*it).first == name) {
 			if(retval) {
 				(*retval) = true;
 			}
 
-			return index;
+			return ((*it).second)->metadata().intMetadata("channelIndex", 0);
 		}
 	}
 
@@ -361,9 +364,13 @@ template<typename T> DifField<T>* DifImage<T>::getField(unsigned int channelid) 
 
 	ChannelListIter it = m_lChannels.begin();
 
-	std::advance(it, channelid);
-	
-	return (*it).second;
+	for(; it != m_lChannels.end(); it++) {
+		if(((*it).second)->metadata().intMetadata("channelIndex", -1) == channelid) {
+			return (*it).second;
+		}
+	}
+
+	return NULL;
 }
 
 /*!
@@ -428,7 +435,6 @@ template<typename T> unsigned int DifImage<T>::depthLevels() const {
  * @param[in] data The Data (must be at least sizeof(T)* numberOfChannels())
  */
 template<typename T> void DifImage<T>::writeData(const V2i& pos, float depth, T* data) {
-	unsigned int i   = numberOfChannels()-1;
 	unsigned int idx = 0;
 	bool status = false;
 
@@ -439,10 +445,16 @@ template<typename T> void DifImage<T>::writeData(const V2i& pos, float depth, T*
 		idx = (m_lDepthMapping.size()-1);
 	}
 
-	ChannelListIter it = m_lChannels.begin();
+	unsigned int current = 0;
 
-	for(; it != m_lChannels.end(); it++, i--) {
-		it->second->writePixel(pos, idx, data[i]);
+	for(; current < numberOfChannels(); current++) {
+		DifField<T>* field = getField(current);
+
+		if(field) {
+			field->writePixel(pos, idx, data[current]);
+		} else {
+			// TODO : now what?
+		}
 	}
 }
 
@@ -475,10 +487,12 @@ template<typename T> bool DifImage<T>::readData(const V2i& pos, float depth, T *
 			return false;
 		}
 
-		ChannelListIter it = m_lChannels.begin();
-	
-		for(; it != m_lChannels.end(); it++, i++) {
-			buffer[i] = it->second->readPixel(pos, idx);
+		for(; i < numberOfChannels(); i++) {
+			DifField<T>* field = getField(i);
+
+			if(field) {
+				buffer[i] = field->readPixel(pos, idx);
+			}
 		}
 	}
 	else if(type == eLinear) {
@@ -495,11 +509,13 @@ template<typename T> bool DifImage<T>::readData(const V2i& pos, float depth, T *
 		T *a = new T[numberOfChannels()];
 		T *b = new T[numberOfChannels()];
 
-		ChannelListIter it = m_lChannels.begin();
+		for(; i < numberOfChannels(); i++) {
+			DifField<T>* field = getField(i);
 
-		for(; it != m_lChannels.end(); it++, i++) {
-			a[i] = it->second->readPixel(pos, bfr);
-			b[i] = it->second->readPixel(pos, aftr);
+			if(field) {
+				a[i] = field->readPixel(pos, bfr);
+				b[i] = field->readPixel(pos, aftr);
+			}
 		}
 
 		{
@@ -513,7 +529,7 @@ template<typename T> bool DifImage<T>::readData(const V2i& pos, float depth, T *
 //					  << "DepthAfter: " << d_aftr << std::endl
 //					  << "dt: " << dt << " t: " << t << std::endl;
 
-			for(unsigned long i = 0; i < numberOfChannels(); i++) {
+			for(i = 0; i < numberOfChannels(); i++) {
 				buffer[i] = Imath::lerp(a[i], b[i], t);
 			}
 		}
@@ -744,7 +760,7 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 
 					addChannel((*cit).first, DifField<T>(*(*cit).second), retidx);
 
-					printf("Load Channel: num=%d name=%s retidx=%d\n", num, (*cit).first.c_str(), retidx);
+//					printf("Load Channel: num=%d name=%s retidx=%d\n", num, (*cit).first.c_str(), retidx);
 					break;
 				}
 			}

@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
 	std::cout << std::endl;
 
 	float cret = 0.0f;
-	difi.readChannelData("r", V2i(0,0), 0.0f, cret);
+	difi.readChannelData("b", V2i(0,0), 0.0f, cret);
 
 	std::cout << cret << std::endl;
 
