@@ -227,6 +227,8 @@ template<typename T> class DifImage {
 
 		V3i m_vSize;
 
+		unsigned int m_ulChannelIndex;
+
 		static const char *m_scDepthMappingName;
 };
 
@@ -239,7 +241,7 @@ template<typename T> const char * DifImage<T>::m_scDepthMappingName = "depthMapp
  *                 this point except for if you're loading a Dif file through
  *                 DifImage::load()
  */
-template<typename T> DifImage<T>::DifImage(const V2i& size) {
+template<typename T> DifImage<T>::DifImage(const V2i& size) : m_ulChannelIndex(0) {
 	m_vSize.x = size.x;
 	m_vSize.y = size.y;
 	m_vSize.z = 1;
@@ -269,7 +271,11 @@ template<typename T> bool DifImage<T>::addChannel(const std::string& name, const
 
 	DifField<T> * handle = new DifField<T>(i);
 
+	handle->metadata().setIntMetadata("channelIndex", m_ulChannelIndex);
+
 	m_lChannels[name] = handle;
+
+	m_ulChannelIndex++;
 
 	return true;
 }
@@ -288,7 +294,11 @@ template<typename T> bool DifImage<T>::addChannel(const std::string& name, unsig
 
 	DifField<T> * handle = new DifField<T>(V2i(m_vSize.x, m_vSize.y));
 
+	handle->metadata().setIntMetadata("channelIndex", m_ulChannelIndex);
+
 	m_lChannels[name] = handle;
+
+	m_ulChannelIndex++;
 
 	return (numberOfChannels() - 1);
 }
@@ -432,7 +442,6 @@ template<typename T> void DifImage<T>::writeData(const V2i& pos, float depth, T*
 	ChannelListIter it = m_lChannels.begin();
 
 	for(; it != m_lChannels.end(); it++, i--) {
-		std::cout << "Write: " << data[i] << " " << (*it).first << std::endl;
 		it->second->writePixel(pos, idx, data[i]);
 	}
 }
@@ -647,6 +656,8 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 	typedef typename Field< T >::Vec           FieldVector;
 	typedef typename Field< T >::Vec::iterator FieldVectorIterator;
 	typedef typename SparseField< T >::Ptr     SparseFieldPtr;
+	typedef typename std::map<std::string, SparseFieldPtr> SparseFieldList;
+	typedef typename std::map<std::string, SparseFieldPtr>::iterator SparseFieldListIterator;
 
 	// giving a layerName does not work for some reason so we look manually for our structure
 	Field<float>::Vec dptMappings = ifp.readScalarLayers<float>();
@@ -688,6 +699,8 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 		return false;
 	}
 
+	SparseFieldList tmplist;
+
 	{
 		FieldVectorIterator it;
 		V3i initialSize;
@@ -714,11 +727,29 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 				continue;
 			}
 
-			unsigned int retid = 0;
+			tmplist[(*it)->name] = handle;
 
-			addChannel((*it)->name, DifField<T>(*handle), retid);
+			//addChannel((*it)->name, DifField<T>(*handle), retid);
 		}
-	
+
+		SparseFieldListIterator cit;
+
+		unsigned int num = 0;
+		long sz = tmplist.size();
+
+		for(; num < sz; num++) {
+			for(cit = tmplist.begin(); cit != tmplist.end(); cit++) {
+				if((*cit).second->metadata().intMetadata("channelIndex", -1) == num) {
+					unsigned int retidx = 0;
+
+					addChannel((*cit).first, DifField<T>(*(*cit).second), retidx);
+
+					//printf("Load Channel: num=%d name=%s retidx=%d\n", num, (*cit).first.c_str(), retidx);
+					break;
+				}
+			}
+		}
+
 	}
 
 	return (m_lChannels.size() > 0) ? true : false;
