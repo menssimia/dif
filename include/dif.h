@@ -275,7 +275,7 @@ template<typename T> bool DifImage<T>::addChannel(const std::string& name, const
 
 	m_lChannels[name] = handle;
 
-	m_ulChannelIndex++;
+	retid = m_ulChannelIndex++;
 
 	return true;
 }
@@ -298,7 +298,7 @@ template<typename T> bool DifImage<T>::addChannel(const std::string& name, unsig
 
 	m_lChannels[name] = handle;
 
-	m_ulChannelIndex++;
+	retid = m_ulChannelIndex++;
 
 	return (numberOfChannels() - 1);
 }
@@ -744,7 +744,7 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 
 					addChannel((*cit).first, DifField<T>(*(*cit).second), retidx);
 
-					//printf("Load Channel: num=%d name=%s retidx=%d\n", num, (*cit).first.c_str(), retidx);
+					printf("Load Channel: num=%d name=%s retidx=%d\n", num, (*cit).first.c_str(), retidx);
 					break;
 				}
 			}
