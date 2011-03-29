@@ -230,9 +230,11 @@ template<typename T> class DifImage {
 		unsigned int m_ulChannelIndex;
 
 		static const char *m_scDepthMappingName;
+		static const char *m_scChannelIndexName;
 };
 
 template<typename T> const char * DifImage<T>::m_scDepthMappingName = "depthMapping";
+template<typename T> const char * DifImage<T>::m_scChannelIndexName = "channelIndex";
 
 /*!
  * @brief Assignment constructor
@@ -271,7 +273,7 @@ template<typename T> bool DifImage<T>::addChannel(const std::string& name, const
 
 	DifField<T> * handle = new DifField<T>(i);
 
-	handle->metadata().setIntMetadata("channelIndex", m_ulChannelIndex);
+	handle->metadata().setIntMetadata(m_scChannelIndexName, m_ulChannelIndex);
 
 	m_lChannels[name] = handle;
 
@@ -296,7 +298,7 @@ template<typename T> bool DifImage<T>::addChannel(const std::string& name, unsig
 
 	DifField<T> * handle = new DifField<T>(V2i(m_vSize.x, m_vSize.y));
 
-	handle->metadata().setIntMetadata("channelIndex", m_ulChannelIndex);
+	handle->metadata().setIntMetadata(m_scChannelIndexName, m_ulChannelIndex);
 
 	m_lChannels[name] = handle;
 
@@ -337,7 +339,7 @@ template<typename T> unsigned int DifImage<T>::channelIndex(const std::string& n
 				(*retval) = true;
 			}
 
-			return ((*it).second)->metadata().intMetadata("channelIndex", 0);
+			return ((*it).second)->metadata().intMetadata(m_scChannelIndexName, 0);
 		}
 	}
 
@@ -365,7 +367,7 @@ template<typename T> DifField<T>* DifImage<T>::getField(unsigned int channelid) 
 	ChannelListIter it = m_lChannels.begin();
 
 	for(; it != m_lChannels.end(); it++) {
-		if(((*it).second)->metadata().intMetadata("channelIndex", -1) == channelid) {
+		if(((*it).second)->metadata().intMetadata(m_scChannelIndexName, -1) == channelid) {
 			return (*it).second;
 		}
 	}
@@ -755,7 +757,7 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 
 		for(; num < sz; num++) {
 			for(cit = tmplist.begin(); cit != tmplist.end(); cit++) {
-				if((*cit).second->metadata().intMetadata("channelIndex", -1) == num) {
+				if((*cit).second->metadata().intMetadata(m_scChannelIndexName, -1) == num) {
 					unsigned int retidx = 0;
 
 					addChannel((*cit).first, DifField<T>(*(*cit).second), retidx);
