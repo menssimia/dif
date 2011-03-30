@@ -188,6 +188,8 @@ template<typename T> class DifImage {
 
 		bool validChannelId(unsigned int id) const;
 
+		bool hasChannel(const std::string& name);
+
 		unsigned int depthLevels() const;
 
 		enum DifImageInterpolation {
@@ -348,6 +350,10 @@ template<typename T> unsigned int DifImage<T>::channelIndex(const std::string& n
 	}
 
 	return 0;
+}
+
+template<typename T> bool DifImage<T>::hasChannel(const std::string& name) {
+	return validChannelId(channelIndex(name));
 }
 
 /// Returns the number of channels.
@@ -708,7 +714,6 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 	if(!depthLoaded) {
 		return false;
 	}
-
 	
 
 	FieldVector fields = ifp.readScalarLayers<T>();
