@@ -215,6 +215,7 @@ template<typename T> class DifImage {
 		void loadDepthMapping(const SparseField<float>::Ptr field);
 	
 		DifField<T>* getField(unsigned int channelid);
+		DifField<T>* addChannelIntern(const std::string& name, const DifField<T>& i, unsigned int& retid);
 		
 	private:
 		typedef std::map<std::string, DifField<T> * > ChannelList;
@@ -265,6 +266,19 @@ template<typename T> DifImage<T>::~DifImage() {
  * @retval false Size mismatch or channel of the same name already existing  
  */
 template<typename T> bool DifImage<T>::addChannel(const std::string& name, const DifField<T>& i, unsigned int& retid) {
+	DifField<T> * handle = addChannelIntern(name, i, retid);
+
+	if(!handle) {
+		return false;
+	}
+
+	handle->metadata().setIntMetadata(m_scChannelIndexName, m_ulChannelIndex);
+	handle->setSize(V3i(m_vSize.x, m_vSize.y, depthLevels()));
+
+	return true;
+}
+
+template<typename T> DifField<T>* DifImage<T>::addChannelIntern(const std::string& name, const DifField<T>& i, unsigned int& retid) {
 	if(i.getSize() != m_vSize) {
 		return false;
 	}
@@ -275,15 +289,13 @@ template<typename T> bool DifImage<T>::addChannel(const std::string& name, const
 
 	DifField<T> * handle = new DifField<T>(i);
 
-	handle->metadata().setIntMetadata(m_scChannelIndexName, m_ulChannelIndex);
-
 	m_lChannels[name] = handle;
 
 	retid = m_ulChannelIndex;
 
 	++m_ulChannelIndex;
 
-	return true;
+	return handle;
 }
 
 /*!
@@ -301,6 +313,7 @@ template<typename T> bool DifImage<T>::addChannel(const std::string& name, unsig
 	DifField<T> * handle = new DifField<T>(V2i(m_vSize.x, m_vSize.y));
 
 	handle->metadata().setIntMetadata(m_scChannelIndexName, m_ulChannelIndex);
+	handle->setSize(V3i(m_vSize.x, m_vSize.y, depthLevels()));
 
 	m_lChannels[name] = handle;
 
@@ -765,7 +778,7 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 				if((*cit).second->metadata().intMetadata(m_scChannelIndexName, -1) == num) {
 					unsigned int retidx = 0;
 
-					addChannel((*cit).first, DifField<T>(*(*cit).second), retidx);
+					addChannelIntern((*cit).first, DifField<T>(*(*cit).second), retidx);
 
 //					printf("Load Channel: num=%d name=%s retidx=%d\n", num, (*cit).first.c_str(), retidx);
 					break;
