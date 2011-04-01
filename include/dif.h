@@ -546,10 +546,6 @@ template<typename T> bool DifImage<T>::readData(const V2i& pos, float depth, T *
 			float dt = d_aftr - d_bfr;
 			float t  = (depth - d_bfr) / dt;
 
-//			std::cout << "DepthBefore: " << d_bfr << std::endl
-//					  << "DepthAfter: " << d_aftr << std::endl
-//					  << "dt: " << dt << " t: " << t << std::endl;
-
 			for(i = 0; i < numberOfChannels(); i++) {
 				buffer[i] = Imath::lerp(a[i], b[i], t);
 			}
@@ -646,14 +642,8 @@ template<typename T> bool DifImage<T>::readChannelData(const std::string& channe
  * Saves the Deep image to the given output file.
  */
 template<typename T> void DifImage<T>::save(Field3DOutputFile& ofp) {
-//	bool scalar = true;
 
 	ChannelListIter it = m_lChannels.begin();
-
-//	if(field_dynamic_cast< SparseField<T> >(it->second)) {
-//		scalar = true;
-//	}
-
 
 	{
 		SparseField<float>::Ptr dptmapping = new SparseField<float>();
@@ -665,8 +655,6 @@ template<typename T> void DifImage<T>::save(Field3DOutputFile& ofp) {
 		for(dit = m_lDepthMapping.begin(); dit != m_lDepthMapping.end(); dit++) {
 			dptmapping->lvalue(0, 0, i) = (*dit);
 			++i;
-
-			//std::cout << "[" << i << "] = " << (float)*dit << std::endl;
 		}
 
 		ofp.writeScalarLayer<float>(m_scDepthMappingName, dptmapping);
