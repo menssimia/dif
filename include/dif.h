@@ -735,8 +735,6 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 		return false;
 	}
 
-	SparseFieldList tmplist;
-
 	{
 		FieldVectorIterator it;
 		V3i initialSize;
@@ -763,29 +761,9 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 				continue;
 			}
 
-			tmplist[(*it)->name] = handle;
-
-			//addChannel((*it)->name, DifField<T>(*handle), retid);
+			unsigned int retid;
+			addChannelIntern((*it)->name, DifField<T>(*handle), retid);
 		}
-
-		SparseFieldListIterator cit;
-
-		unsigned int num = 0;
-		long sz = tmplist.size();
-
-		for(; num < sz; num++) {
-			for(cit = tmplist.begin(); cit != tmplist.end(); cit++) {
-				if((*cit).second->metadata().intMetadata(m_scChannelIndexName, -1) == num) {
-					unsigned int retidx = 0;
-
-					addChannelIntern((*cit).first, DifField<T>(*(*cit).second), retidx);
-
-//					printf("Load Channel: num=%d name=%s retidx=%d\n", num, (*cit).first.c_str(), retidx);
-					break;
-				}
-			}
-		}
-
 	}
 
 	return (m_lChannels.size() > 0) ? true : false;

@@ -79,7 +79,7 @@ int fieldtest() {
 int main(int argc, char *argv[]) {
 	initIO();
 
-//	fieldtest();
+	fieldtest();
 
 	DifImage<float> dif(V2i(12,12));
 
@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
 	std::cout << std::endl;
 
 	float cret = 0.0f;
-	difi.readChannelData("b", V2i(0,0), 0.0f, cret);
+	difi.readChannelData("b", V2i(0,0), 23.1f, cret);
 
 	std::cout << cret << std::endl;
 
