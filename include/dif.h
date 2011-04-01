@@ -849,6 +849,7 @@ template<typename T> void DifImage<T>::getNearestDepthIndex(float dpt, DifImage<
 	retid = lidx;
 }
 
+#undef _THROW
 #undef _DIF_TYPE
 FIELD3D_NAMESPACE_HEADER_CLOSE 
 
