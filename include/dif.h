@@ -211,6 +211,28 @@ template<typename T> class DifImage {
 
 		void getNearestDepthIndex(float dpt, enum DifImageGetType type, unsigned int& retid);
 
+#ifndef _NEXCEPTIONS
+		bool exceptionsEnabled() const;
+		void setExceptionsEnabled(bool yorn);
+
+		
+		class DifException : public std::exception {
+			public:
+				DifException(const std::string& what) throw() : m_sWhat(what) {}
+				~DifException() throw() {}
+				virtual const char* what() const throw() {return m_sWhat.c_str();}
+			private:
+				std::string m_sWhat;
+		};
+
+		#define _THROW(what) \
+			if(m_bExceptionsEnabled) {\
+				throw DifException(#what);\
+			}
+#else
+		#define _THROW(what)
+#endif //_NEXCEPTIONS
+
 	protected:
 		void loadDepthMapping(const SparseField<float>::Ptr field);
 	
@@ -230,7 +252,12 @@ template<typename T> class DifImage {
 
 		V3i m_vSize;
 
+
 		unsigned int m_ulChannelIndex;
+
+#ifndef _NEXCEPTIONS
+		bool m_bExceptionsEnabled;
+#endif //_NEXCEPTIONS
 
 		static const char *m_scDepthMappingName;
 		static const char *m_scChannelIndexName;
@@ -250,12 +277,26 @@ template<typename T> DifImage<T>::DifImage(const V2i& size) : m_ulChannelIndex(0
 	m_vSize.x = size.x;
 	m_vSize.y = size.y;
 	m_vSize.z = 1;
+
+#ifndef _NEXCEPTIONS
+	m_bExceptionsEnabled = false;
+#endif //_NEXCEPTIONS
 }
 
 /// Default destructor
 template<typename T> DifImage<T>::~DifImage() {
 	m_lChannels.clear();
 }
+
+#ifndef _NEXCEPTIONS
+template<typename T> bool DifImage<T>::exceptionsEnabled() const {
+	return m_bExceptionsEnabled;
+}
+
+template<typename T> void DifImage<T>::setExceptionsEnabled(bool yorn) {
+	m_bExceptionsEnabled = yorn;
+}
+#endif //_NEXCEPTIONS
 
 /*!
  * @brief Adds a channel by using an existing DifField
@@ -269,6 +310,7 @@ template<typename T> bool DifImage<T>::addChannel(const std::string& name, const
 	DifField<T> * handle = addChannelIntern(name, i, retid);
 
 	if(!handle) {
+		_THROW("addChannel() : addChannelIntern() returned an invalid pointer.");
 		return false;
 	}
 
@@ -280,10 +322,12 @@ template<typename T> bool DifImage<T>::addChannel(const std::string& name, const
 
 template<typename T> DifField<T>* DifImage<T>::addChannelIntern(const std::string& name, const DifField<T>& i, unsigned int& retid) {
 	if(i.getSize() != m_vSize) {
+		_THROW("addChannelIntern() : size mismatch with provided channel.");
 		return false;
 	}
 
 	if(m_lChannels.find(name) != m_lChannels.end()) {
+		_THROW("addChannelIntern() : channel of the same name exists.");
 		return false;
 	}
 
@@ -307,6 +351,7 @@ template<typename T> DifField<T>* DifImage<T>::addChannelIntern(const std::strin
  */
 template<typename T> bool DifImage<T>::addChannel(const std::string& name, unsigned int& retid) {
 	if(m_lChannels.find(name) != m_lChannels.end()) {
+		_THROW("addChannel() : channel of the same name exists.");
 		return false;
 	}
 
@@ -474,7 +519,7 @@ template<typename T> void DifImage<T>::writeData(const V2i& pos, float depth, T*
 		if(field) {
 			field->writePixel(pos, idx, data[current]);
 		} else {
-			// TODO : now what?
+			_THROW("writeData() : channel invalid");
 		}
 	}
 }
@@ -689,6 +734,7 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 	bool depthLoaded = false;
 
 	if(dptMappings.size() < 1) {
+		_THROW("load() : no depth mapping field available");
 		return false;
 	}
 
@@ -700,6 +746,7 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 				SparseField<float>::Ptr depthField = field_dynamic_cast< SparseField<float> >(dptMappings[0]);
 
 				if(!depthField) {
+					_THROW("load() : depth field is not a SparseField of type float");
 					return false;
 				}
 
@@ -713,6 +760,7 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 
 	// No depth mapping available
 	if(!depthLoaded) {
+		_THROW("load() : couldn't load depth mapping");
 		return false;
 	}
 	
@@ -720,6 +768,7 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 	FieldVector fields = ifp.readScalarLayers<T>();
 
 	if(fields.size() < 1) {
+		_THROW("load() : no channels available");
 		return false;
 	}
 
