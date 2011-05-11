@@ -410,6 +410,11 @@ template<typename T> unsigned int DifImage<T>::channelIndex(const std::string& n
 	return 0;
 }
 
+/*!
+ * @brief Determines whether the Image as a achannel named @a name
+ * @param[in] name Channel's Name
+ * @return boolean
+ */
 template<typename T> bool DifImage<T>::hasChannel(const std::string& name) {
 	return validChannelId(channelIndex(name));
 }
@@ -419,6 +424,11 @@ template<typename T> unsigned int DifImage<T>::numberOfChannels() const {
 	return m_lChannels.size();
 }
 
+/*!
+ * @brief Determines whether the given channel index @a id is valid
+ * @param[in] id Channel ID
+ * @return boolean
+ */
 template<typename T> bool DifImage<T>::validChannelId(unsigned int id) const {
 	return (id < m_lChannels.size());
 }
@@ -465,7 +475,7 @@ template<typename T> float DifImage<T>::depthAtIndex(unsigned int idx, bool* ret
  * @brief Returns the index of the given depth
  * @param[in]  dpt The depth
  * @param[out] retval (Optimal) Pointer to a bool for the return code
- * @return An unsigned integer in range 0..depthLevels()-1 also 0 on error 
+ * @return An unsigned integer in range 0..depthLevels()-1 also 0 on error
  */
 template<typename T> unsigned int DifImage<T>::indexAtDepth(float dpt, bool* retval) const {
 
@@ -495,10 +505,10 @@ template<typename T> unsigned int DifImage<T>::depthLevels() const {
  * @brief Write Data to the image
  *
  * This function has no return value and will simply ignore the data if the given
- * Position @a pos is invalid. 
+ * Position @a pos is invalid.
  * @param[in] pos The Position
- * @param[in] depth The depth level
- * @param[in] data The Data (must be at least sizeof(T)* numberOfChannels())
+ * @param[in] depth The depth level.
+ * @param[in] data Data to write (must be at least sizeof(T)* numberOfChannels())
  */
 template<typename T> void DifImage<T>::writeData(const V2i& pos, float depth, T* data) {
 	unsigned int idx = 0;
@@ -525,11 +535,12 @@ template<typename T> void DifImage<T>::writeData(const V2i& pos, float depth, T*
 }
 
 /*!
- * @brief Reads Data from the Image
+ * @brief Reads data from the image
  * @param[in] pos    Position
  * @param[in] depth  Desired depth
  * @param[in] buffer Buffer to write data to
  * @param[in] type   Interpolation type
+ * @return boolean
  *
  * If no data is available at the given @a depth it will be interpolated by the nearest two 
  * depths available if @a type is eLinear or will return false otherwise.
@@ -605,10 +616,11 @@ template<typename T> bool DifImage<T>::readData(const V2i& pos, float depth, T *
 
 /*!
  * @brief Reads the data at the given position and depth of a single channel
- * @param[in] channelid Channel ID 
+ * @param[in] channelid Channel Index
  * @param[in] depth     Desired depth
- * @param[out] retval   Variable to wwrite the data to
+ * @param[out] retval   Variable to write the data in
  * @param[in] type      Interpolation type
+ * @return boolean
  */
 template<typename T> bool DifImage<T>::readChannelData(unsigned int channelid, const V2i& pos, float depth, T& retval, enum DifImage<T>::DifImageInterpolation type) {
 	DifField<T> *field = getField(channelid);
@@ -721,7 +733,7 @@ template<typename T> void DifImage<T>::loadDepthMapping(const SparseField<float>
 	}
 }
 
-/// Loads the image from a input file.
+/// Loads the Dif Image from an Input file.
 template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
 	typedef typename Field< T >::Vec           FieldVector;
 	typedef typename Field< T >::Vec::iterator FieldVectorIterator;
@@ -811,7 +823,7 @@ template<typename T> bool DifImage<T>::load(Field3DInputFile& ifp) {
  *
  * @param[in] dpt    The Depth
  * @param[in] type   Type
- * @param[out] retid Return Depth ID
+ * @param[out] retid The nearest depth Index
  */
 template<typename T> void DifImage<T>::getNearestDepthIndex(float dpt, DifImage<T>::DifImageGetType type, unsigned int& retid) {
 	DepthMappingListIter it;
