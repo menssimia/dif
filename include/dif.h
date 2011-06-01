@@ -659,6 +659,8 @@ template<typename T> bool DifImage<T>::readChannelData(unsigned int channelid, c
 		}
 
 		{
+			aftr = (bfr + 1);
+
 			float d_bfr  = depthAtIndex(bfr);
 			float d_aftr = depthAtIndex(aftr);
 
@@ -668,7 +670,7 @@ template<typename T> bool DifImage<T>::readChannelData(unsigned int channelid, c
 			bool stata = false;
 			bool statb = false;
 
-			T a = field->readPixel(pos, bfr, &stata);
+			T a = field->readPixel(pos, bfr,  &stata);
 			T b = field->readPixel(pos, aftr, &statb);
 
 			if(!stata || !statb) {
