@@ -8,6 +8,73 @@
 
 using namespace Field3D;
 
+int hardtest() {
+	Field3DOutputFile ofp;
+
+	if(!ofp.create("test_hardcore.dif")) {
+		std::cout << "Error opening output file" << std::endl;
+		return -1;
+	}
+
+	DifImage<float> dif(V2i(128, 128));
+	printf("adding channels\n");
+	unsigned int r, g, b, a;
+	dif.addChannel("r", r);
+	dif.addChannel("g", g);
+	dif.addChannel("b", b);
+	dif.addChannel("a", a);
+
+	float data[4];
+
+	for(int i = 0; i < 128; i++) {
+
+		for(int j = 0; j < 4; j++) {
+			data[0] = j + i;
+			data[1] = j + i + 1;
+			data[2] = j + i + 2;
+			data[3] = j + i + 3;
+
+			printf("%dx%d -> %d data=%f\n", i,i,j, data[0]);
+			dif.writeData(V2i(i,i), float(j), data);
+		}
+
+	}
+
+	printf("done\n");
+		
+	dif.save(ofp);
+	ofp.close();
+
+	Field3DInputFile ifp;
+
+	if(!ifp.open("test_hardcore.dif")) {
+		std::cout << "Error opening input file" << std::endl;
+		return -1;
+	}
+
+	DifImage<float> difi(V2i(0,0));
+	if(!difi.load(ifp)) {
+		std::cout << "Error loading deep image file" << std::endl;
+		return -1;		
+	}
+
+	float rdata[4];
+
+	for(int i = 0; i < 128; i++) {
+		for(int j = 0; j < 4; j++) {
+			difi.readData(V2i(i,i), float(j), rdata);
+
+			assert(rdata[0] == j + i);
+			assert(rdata[1] == j + i + 1);
+			assert(rdata[2] == j + i + 2);
+			assert(rdata[3] == j + i + 3);
+		}
+
+	}
+
+	return 0;
+}
+
 int fieldtest() {
 	Field3DOutputFile ofp;
 
@@ -149,7 +216,9 @@ int main(int argc, char *argv[]) {
 	float cret = 0.0f;
 	difi.readChannelData("b", V2i(0,0), 23.1f, cret);
 
-	std::cout << cret << std::endl;
+	std::cout << cret << std::endl; 
+
+	hardtest();
 
 	return 0;
 }
