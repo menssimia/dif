@@ -8,4 +8,4 @@ INCLUDE_DIRECTORIES(include/)
 
 
 ADD_EXECUTABLE(test test.cpp)
-TARGET_LINK_LIBRARIES(test Field3D hdf5 hdf5_hl dl Imath Half)
+TARGET_LINK_LIBRARIES(test Field3D hdf5 hdf5_hl dl Imath Half Iex)
