@@ -68,6 +68,7 @@ template<typename T> class DifField : public SparseField<T> {
 
 	private:
 		V3i   m_vSize; // So we dont need recopmputation through dataResolution()
+		bool  m_bHasData;
 };
 
 template<typename T> DifField<T>::DifField(const V2i& size) : _DIF_TYPE() {
@@ -76,15 +77,19 @@ template<typename T> DifField<T>::DifField(const V2i& size) : _DIF_TYPE() {
 
 	m_vSize.z = 1;
 
+	m_bHasData = false;
+
 	_DIF_TYPE::setSize(m_vSize);
 	_DIF_TYPE::clear(T(0));
 }
 
-template<typename T> DifField<T>::DifField(const DifField<T>& o) : _DIF_TYPE(o), m_vSize(o.m_vSize) {
+template<typename T> DifField<T>::DifField(const DifField<T>& o) 
+	: _DIF_TYPE(o), m_vSize(o.m_vSize), m_bHasData(o.m_bHasData) {
 	// Nothing
 }
 
-template<typename T> DifField<T>::DifField(const _DIF_TYPE& o) : _DIF_TYPE(o), m_vSize(0) {
+template<typename T> DifField<T>::DifField(const _DIF_TYPE& o) 
+	: _DIF_TYPE(o), m_vSize(0), m_bHasData(true) {
 	m_vSize = _DIF_TYPE::dataResolution();
 }
 
@@ -96,6 +101,7 @@ template<typename T> DifField<T>& DifField<T>::operator=(const DifField<T>& o) {
 	_DIF_TYPE::operator=(o);
 
 	m_vSize = o.m_vSize;
+	m_bHasData = o.m_bHasData;
 
 	return *this;
 }
@@ -130,23 +136,31 @@ template<typename T> bool DifField<T>::writePixel(const V2i& pos, unsigned int d
 	if(depth() <= dpt) {
 		m_vSize.z = dpt+1;
 
-		SparseField<T> tmp(*this);
+		if(m_bHasData) { 
+			
+			// If we have data copy it to a tmp SparseField
+			SparseField<T> tmp(*this);
 
-		_DIF_TYPE::setSize(m_vSize);
+			_DIF_TYPE::setSize(m_vSize);
+			
+			V3i dims = tmp.dataResolution();
 
-		V3i dims = tmp.dataResolution();
+			// And Copy it back onto the resized field.
+			for(int i = 0; i < dims.x; i++) {
+				for(int j = 0; j < dims.y; j++) {
+					for(int k = 0; k < dims.z; k++) {
+						T handle = tmp.value(i, j, k);
 
-		for(int i = 0; i < dims.x; i++) {
-			for(int j = 0; j < dims.y; j++) {
-				for(int k = 0; k < dims.z; k++) {
-					T handle = tmp.value(i, j, k);
-
-					// So we don't waste much RAM
-					if(handle != T(0)) {
-						writePixel(V2i(i, j), k, handle);
+						// So we don't waste much RAM
+						if(handle != T(0)) {
+							writePixel(V2i(i, j), k, handle);
+						}
 					}
 				}
 			}
+		} else {
+			// The Field is empty, hence simply resize
+			_DIF_TYPE::setSize(m_vSize);
 		}
 	}
 
