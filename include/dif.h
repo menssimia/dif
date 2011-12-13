@@ -63,9 +63,11 @@ template<typename T> class DifField : public SparseField<T> {
 		const V3i& getSize() const;
 		void setContainsData();
 		
+		void updateDepth(unsigned int dpt);
+		
 	protected:
 		virtual void sizeChanged();
-
+		
 	private:
 		V3i   m_vSize; // So we dont need recopmputation through dataResolution()
 		bool  m_bHasData;
@@ -133,6 +135,22 @@ template<typename T> bool DifField<T>::writePixel(const V2i& pos, unsigned int d
 
 	//std::cout << "Write: " << data << " dpt=" << dpt << std::endl;
 
+	updateDepth(dpt);
+
+	m_bHasData = true;
+	_DIF_TYPE::lvalue(pos.x, pos.y, dpt) = data;
+}
+
+template<typename T> void DifField<T>::setContainsData() {
+	m_bHasData = true;
+}
+
+
+template<typename T> const V3i& DifField<T>::getSize() const {
+	return m_vSize;
+}
+
+template<typename T> void DifField<T>::updateDepth(unsigned int dpt) {
 	if(depth() <= dpt) {
 		m_vSize.z = dpt+1;
 
@@ -163,18 +181,6 @@ template<typename T> bool DifField<T>::writePixel(const V2i& pos, unsigned int d
 			_DIF_TYPE::setSize(m_vSize);
 		}
 	}
-
-	m_bHasData = true;
-	_DIF_TYPE::lvalue(pos.x, pos.y, dpt) = data;
-}
-
-template<typename T> void DifField<T>::setContainsData() {
-	m_bHasData = true;
-}
-
-
-template<typename T> const V3i& DifField<T>::getSize() const {
-	return m_vSize;
 }
 
 /* Protected */ template<typename T> void DifField<T>::sizeChanged() {
@@ -206,6 +212,8 @@ template<typename T> class DifImage {
 
 		float depthAtIndex(unsigned int idx, bool* retval = 0) const;
 		unsigned int indexAtDepth(float dpt, bool* retval = 0) const;
+		
+		void addDepth(float dpt, bool sync=true);
 
 		bool validChannelId(unsigned int id) const;
 
@@ -883,6 +891,33 @@ template<typename T> void DifImage<T>::getNearestDepthIndex(float dpt, DifImage<
 
 	retid = lidx;
 }
+
+template<typename T> void DifImage<T>::addDepth(float dpt, bool sync) {
+	unsigned int idx = 0;
+	bool status = false;
+
+	idx = indexAtDepth(dpt, &status);
+
+	if(!status) {
+		m_lDepthMapping.push_back(dpt);
+		idx = (m_lDepthMapping.size()-1);
+	}
+
+	if(sync) {
+		unsigned int current = 0;
+
+		for(; current < numberOfChannels(); current++) {
+			DifField<T>* field = getField(current);
+
+			if(field) {
+				field->updateDepth(idx);
+			} else {
+				_THROW("addDepth() : channel invalid");
+			}
+		}
+	}
+}
+
 
 #undef _THROW
 #undef _DIF_TYPE
