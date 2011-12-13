@@ -61,8 +61,8 @@ template<typename T> class DifField : public SparseField<T> {
 		int depth() const;
 
 		const V3i& getSize() const;
-
-
+		void setContainsData();
+		
 	protected:
 		virtual void sizeChanged();
 
@@ -168,6 +168,11 @@ template<typename T> bool DifField<T>::writePixel(const V2i& pos, unsigned int d
 	_DIF_TYPE::lvalue(pos.x, pos.y, dpt) = data;
 }
 
+template<typename T> void DifField<T>::setContainsData() {
+	m_bHasData = true;
+}
+
+
 template<typename T> const V3i& DifField<T>::getSize() const {
 	return m_vSize;
 }
@@ -177,6 +182,7 @@ template<typename T> const V3i& DifField<T>::getSize() const {
 
 	_DIF_TYPE::sizeChanged();
 }
+
 
 
 
