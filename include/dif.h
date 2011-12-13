@@ -898,10 +898,12 @@ template<typename T> void DifImage<T>::addDepth(float dpt, bool sync) {
 
 	idx = indexAtDepth(dpt, &status);
 
-	if(!status) {
-		m_lDepthMapping.push_back(dpt);
-		idx = (m_lDepthMapping.size()-1);
+	if(status) {
+		return;
 	}
+	
+	m_lDepthMapping.push_back(dpt);
+	idx = (m_lDepthMapping.size()-1);
 
 	if(sync) {
 		unsigned int current = 0;
