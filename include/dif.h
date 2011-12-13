@@ -164,6 +164,7 @@ template<typename T> bool DifField<T>::writePixel(const V2i& pos, unsigned int d
 		}
 	}
 
+	m_bHasData = true;
 	_DIF_TYPE::lvalue(pos.x, pos.y, dpt) = data;
 }
 
