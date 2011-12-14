@@ -8,6 +8,24 @@
 
 using namespace Field3D;
 
+void highrestest() {
+	DifImage<float> dif(V2i(4096, 4096));
+	
+	unsigned int r,g,b,a,z;
+	
+	dif.addChannel("r", r);
+	dif.addChannel("g", g);
+	dif.addChannel("b", b);
+	dif.addChannel("a", a);
+	dif.addChannel("z", z);
+	
+	for(int i = 0; i < 10; i++) {
+		dif.addDepth((float)i);
+	}
+	
+	
+}
+
 int hardtest() {
 	Field3DOutputFile ofp;
 
@@ -219,6 +237,9 @@ int main(int argc, char *argv[]) {
 	std::cout << cret << std::endl; 
 
 	hardtest();
+	
+	printf("Starting HiRes Test\n");
+	highrestest();
 
 	return 0;
 }
